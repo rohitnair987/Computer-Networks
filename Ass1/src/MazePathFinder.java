@@ -28,32 +28,33 @@ class Point {
 
 public class MazePathFinder {
 	public static void main(String[] args) {
-		// String file = args[0];
+//		String file = args[0];
 		// testing
-		String file = "testdata/task3.in.1";
+		 String file = "testdata/task4.in.2";
 		System.out.println("File: " + file + "\n");
 
 		char maze[][] = getFileData(file);
 		display(maze);
 
 		// ********* Task 1 *********
-		 System.out.print("\nTask 1: Is the Maze Legal?: ");
-		 System.out.println(isMazeLegal(maze) ? "YES" : "NO");
-		 // ********* Task 1 *********
 		
-		 // ********* Task 2 *********
-		 System.out.print("\nTask 2: Is there a solution?: ");
-		 System.out.println(doesSolutionExist(maze) ? "YES" : "NO");
-		 // ********* Task 2 *********
-		
-		 // ********* Task 3 *********
-		 System.out.println("\nTask 3: Shortest path to destination: ");
-		 shortestPathBFS(maze);
+		System.out.print("\nTask 1: Is the Maze Legal?: ");
+		System.out.println(isMazeLegal(maze) ? "YES" : "NO");
+		// ********* Task 1 *********
+
+		// ********* Task 2 *********
+		System.out.print("\nTask 2: Is there a solution?: ");
+		System.out.println(doesSolutionExist(maze) ? "YES" : "NO");
+		// ********* Task 2 *********
+
+		// ********* Task 3 *********
+		System.out.println("\nTask 3: Shortest path to destination: ");
+		shortestPathBFS(maze);
 		// ********* Task 3 *********
 
 		// ********* Task 4 *********
-//		System.out.println("\nTask 4: Shortest path with Teleporter: ");
-//		shortestPathTeleporter(maze);
+		System.out.println("\nTask 4: Shortest path with Teleporter: ");
+		shortestPathTeleporter(maze);
 		// ********* Task 4 *********
 
 	}
@@ -67,7 +68,13 @@ public class MazePathFinder {
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
-			System.out.println(p.x + " " + p.y + " " + p.path + ", maze: " + maze[p.x][p.y]);
+			System.out.print(p.x + " " + p.y + " " + p.path + ", maze: " + maze[p.x][p.y] + " -- Queue: ");
+			Queue<Point> q2 = new LinkedList<Point>(q);
+			while (!q2.isEmpty()) {
+				Point x = q2.remove();
+				System.out.print(x.x + "," + x.y + " ");
+			}
+			System.out.println();
 
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
 				// replace this syso by writing to file
@@ -76,32 +83,39 @@ public class MazePathFinder {
 			}
 
 			if (isNumber(maze[p.x][p.y])) {
-				System.out.println("teleport to " + findMatchingPair(maze, p).x + " " + findMatchingPair(maze, p).y);
+				String path = p.path;
 				p = findMatchingPair(maze, p);
+				p.path = path;
+				System.out.println("teleport to " + p.x + " " + p.y);
 			}
 
 			// addNeighbors(q, p, visited, maze);
 			visited[p.x][p.y] = true;
-			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D')) {
+			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D' || isNumber(maze[p.x + 1][p.y]))) {
 				q.add(new Point(p.x + 1, p.y, p.path + "D"));
 			}
-			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D')) {
+			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D' || isNumber(maze[p.x - 1][p.y]))) {
 				q.add(new Point(p.x - 1, p.y, p.path + "U"));
 			}
-			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D')) {
+			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D' || isNumber(maze[p.x][p.y + 1]))) {
 				q.add(new Point(p.x, p.y + 1, p.path + "R"));
 			}
-			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D')) {
+			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D' || isNumber(maze[p.x][p.y - 1]))) {
 				q.add(new Point(p.x, p.y - 1, p.path + "L"));
 			}
 		}
 	}
 
 	private static Point findMatchingPair(char[][] maze, Point p) {
+		// char x2 = maze[p.x][p.y];
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[0].length; j++) {
-				if (maze[i][j] == maze[p.x][p.y] && i != p.x && j != p.y) {
-					return new Point(i, j);
+				// char x1 = maze[i][j];
+				// if (maze[i][j] == maze[p.x][p.y] && i != p.x && j != p.y) {
+				if (maze[i][j] == maze[p.x][p.y]) {
+					if (!(i == p.x && j == p.y)) {
+						return new Point(i, j);
+					}
 				}
 			}
 		}
@@ -205,7 +219,8 @@ public class MazePathFinder {
 					isDestinationPresent = true;
 				}
 				else if (!(grid[i][j] == '.' || grid[i][j] == '#')) {
-//				else if (!(grid[i][j] == '.' || grid[i][j] == '#' || isNumber(grid[i][j]))) {
+					// else if (!(grid[i][j] == '.' || grid[i][j] == '#' ||
+					// isNumber(grid[i][j]))) {
 					return false;
 				}
 			}
