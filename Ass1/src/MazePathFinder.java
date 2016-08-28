@@ -1,31 +1,28 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 class Point {
 	int x;
 	int y;
-	char direction;
+	String path;
 
 	public Point() {
 		x = 0;
 		y = 0;
-		direction = 'x';
+		path = "";
 	}
 
 	public Point(int a, int b) {
 		x = a;
 		y = b;
-		direction = 'x';
+		path = "";
 	}
 
-	public Point(int a, int b, char d) {
+	public Point(int a, int b, String p) {
 		x = a;
 		y = b;
-		direction = d;
+		path = p;
 	}
 }
 
@@ -67,24 +64,14 @@ public class MazePathFinder {
 		Queue<Point> q = new LinkedList<Point>();
 		q.add(findSource(maze));
 		boolean visited[][] = new boolean[m][n];
-		Point parent[][] = new Point[m][n];
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
-			System.out.println(p.x + " " + p.y + " " + p.direction + ", maze: " + maze[p.x][p.y]);
+			System.out.println(p.x + " " + p.y + " " + p.path + ", maze: " + maze[p.x][p.y]);
 
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
-				ArrayList<String> path = new ArrayList<String>();
-				while (maze[p.x][p.y] != 's' && maze[p.x][p.y] != 'S') {
-					path.add(Character.toString(Character.toUpperCase(p.direction)));
-					p = parent[p.x][p.y];
-				}
-
-				Collections.reverse(path);
-				for (String s : path) {
-					System.out.print(s);
-				}
-				System.out.println();
+				// replace this syso by writing to file
+				System.out.println("Final path: " + p.path);
 				break;
 			}
 
@@ -93,23 +80,19 @@ public class MazePathFinder {
 				p = findMatchingPair(maze, p);
 			}
 
-			// addNeighbors(q, p, visited, parent, maze);
+			// addNeighbors(q, p, visited, maze);
 			visited[p.x][p.y] = true;
-			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D' || isNumber(maze[p.x + 1][p.y]))) {
-				parent[p.x + 1][p.y] = p;
-				q.add(new Point(p.x + 1, p.y, 'd'));
+			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D')) {
+				q.add(new Point(p.x + 1, p.y, p.path + "D"));
 			}
-			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D' || isNumber(maze[p.x - 1][p.y]))) {
-				parent[p.x - 1][p.y] = p;
-				q.add(new Point(p.x - 1, p.y, 'u'));
+			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D')) {
+				q.add(new Point(p.x - 1, p.y, p.path + "U"));
 			}
-			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D' || isNumber(maze[p.x][p.y + 1]))) {
-				parent[p.x][p.y + 1] = p;
-				q.add(new Point(p.x, p.y + 1, 'r'));
+			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D')) {
+				q.add(new Point(p.x, p.y + 1, p.path + "R"));
 			}
-			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D' || isNumber(maze[p.x][p.y - 1]))) {
-				parent[p.x][p.y - 1] = p;
-				q.add(new Point(p.x, p.y - 1, 'l'));
+			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D')) {
+				q.add(new Point(p.x, p.y - 1, p.path + "L"));
 			}
 		}
 	}
@@ -138,7 +121,6 @@ public class MazePathFinder {
 		Queue<Point> q = new LinkedList<Point>();
 		q.add(findSource(maze));
 		boolean visited[][] = new boolean[m][n];
-		Point parent[][] = new Point[m][n];
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
@@ -146,7 +128,7 @@ public class MazePathFinder {
 				return true;
 			}
 
-			addNeighbors(q, p, visited, parent, maze);
+			addNeighbors(q, p, visited, maze);
 		}
 		return false;
 	}
@@ -157,51 +139,37 @@ public class MazePathFinder {
 		Queue<Point> q = new LinkedList<Point>();
 		q.add(findSource(maze));
 		boolean visited[][] = new boolean[m][n];
-		Point parent[][] = new Point[m][n];
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
-			// System.out.println(p.x + " " + p.y + " " + p.direction + ", maze:
+			// System.out.println(p.x + " " + p.y + " " + p.path + ", maze:
 			// " + maze[p.x][p.y]);
 
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
-				ArrayList<String> path = new ArrayList<String>();
-				while (maze[p.x][p.y] != 's' && maze[p.x][p.y] != 'S') {
-					path.add(Character.toString(Character.toUpperCase(p.direction)));
-					p = parent[p.x][p.y];
-				}
-
-				Collections.reverse(path);
-				for (String s : path) {
-					System.out.print(s);
-				}
-				System.out.println();
+				// replace this syso by writing to file
+				System.out.println("Final path: " + p.path);
 				break;
 			}
 
-			addNeighbors(q, p, visited, parent, maze);
+			addNeighbors(q, p, visited, maze);
 		}
 	}
 
-	private static void addNeighbors(Queue<Point> q, Point p, boolean[][] visited, Point[][] parent, char[][] maze) {
+	private static void addNeighbors(Queue<Point> q, Point p, boolean[][] visited, char[][] maze) {
 		int m = maze.length;
 		int n = maze[0].length;
 		visited[p.x][p.y] = true;
 		if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D')) {
-			parent[p.x + 1][p.y] = p;
-			q.add(new Point(p.x + 1, p.y, 'd'));
+			q.add(new Point(p.x + 1, p.y, p.path + "D"));
 		}
 		if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D')) {
-			parent[p.x - 1][p.y] = p;
-			q.add(new Point(p.x - 1, p.y, 'u'));
+			q.add(new Point(p.x - 1, p.y, p.path + "U"));
 		}
 		if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D')) {
-			parent[p.x][p.y + 1] = p;
-			q.add(new Point(p.x, p.y + 1, 'r'));
+			q.add(new Point(p.x, p.y + 1, p.path + "R"));
 		}
 		if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D')) {
-			parent[p.x][p.y - 1] = p;
-			q.add(new Point(p.x, p.y - 1, 'l'));
+			q.add(new Point(p.x, p.y - 1, p.path + "L"));
 		}
 	}
 
@@ -237,6 +205,7 @@ public class MazePathFinder {
 					isDestinationPresent = true;
 				}
 				else if (!(grid[i][j] == '.' || grid[i][j] == '#')) {
+//				else if (!(grid[i][j] == '.' || grid[i][j] == '#' || isNumber(grid[i][j]))) {
 					return false;
 				}
 			}
