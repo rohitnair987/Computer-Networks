@@ -38,40 +38,48 @@ public class MazePathFinder {
 			// cIn.close();
 			// String file = "testdata/task1.in.1";
 			String file = args[1];
-			System.out.println("File: " + file + "\n");
+			// System.out.println("File: " + file + "\n");
 
 			char maze[][] = getFileData(file);
 			if (maze == null) {
-				System.out.println("NO");
+				System.out.print("NO");
 			}
 			else {
 				// display(maze);
 
 				// ********* Task 1 *********
 				if (task.equals("1")) {
-					System.out.print("\nTask 1: Is the Maze Legal?: ");
-					System.out.println(isMazeLegal(maze) ? "YES" : "NO");
+					// System.out.print("\nTask 1: Is the Maze Legal?: ");
+					System.out.print(isMazeLegal(maze) ? "YES" : "NO");
 				}
 
 				// ********* Task 2 *********
 				else if (task.equals("2")) {
-					System.out.print("\nTask 2: Is there a solution?: ");
-					System.out.println(doesSolutionExist(maze) ? "YES" : "NO");
+					// System.out.print("\nTask 2: Is there a solution?: ");
+					System.out.print(doesSolutionExist(maze) ? "YES" : "NO");
 				}
 
 				// ********* Task 3 *********
 				else if (task.equals("3")) {
-					System.out.println("\nTask 3: Shortest path to destination: ");
-					shortestPathBFS(maze);
+
+					// System.out.println("\nTask 3: Shortest path to
+					// destination: ");
+					if(doesSolutionExist(maze)){
+						shortestPathBFS(maze);
+					}
+					else {
+						System.out.print("NO");
+					}
 				}
 
 				// ********* Task 4 *********
 				else if (task.equals("4")) {
-					System.out.println("\nTask 4: Shortest path with Teleporter: ");
+					// System.out.println("\nTask 4: Shortest path with
+					// Teleporter: ");
 					shortestPathTeleporter(maze);
 				}
 				else {
-					System.out.println("Please enter first argument (task number) as 1, 2, 3 or 4");
+					System.out.print("Please enter first argument (task number) as 1, 2, 3 or 4");
 				}
 			}
 		}
@@ -97,7 +105,7 @@ public class MazePathFinder {
 
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
 				// replace this syso by writing to file
-				System.out.println(p.path);
+				System.out.print(p.path);
 				break;
 			}
 
@@ -105,7 +113,7 @@ public class MazePathFinder {
 				String path = p.path;
 				p = findMatchingPair(maze, p);
 				p.path = path;
-				System.out.println("teleport to " + p.x + " " + p.y);
+//				System.out.println("teleport to " + p.x + " " + p.y);
 			}
 
 			// addNeighbors(q, p, visited, maze);
@@ -180,7 +188,7 @@ public class MazePathFinder {
 
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
 				// replace this syso by writing to file
-				System.out.println("Final path: " + p.path);
+				System.out.print(p.path);
 				break;
 			}
 
@@ -227,7 +235,7 @@ public class MazePathFinder {
 		for (int i = 0; i < grid.length; i++) {
 			// System.out.println(grid[i].length);
 			if (grid[i].length != noOfColumns) {
-				System.out.print("Not an m*n matrix ");
+				// System.out.print("Not an m*n matrix ");
 				return false;
 			}
 			for (int j = 0; j < noOfColumns; j++) {
@@ -272,7 +280,7 @@ public class MazePathFinder {
 
 			BufferedReader bIn = new BufferedReader(new FileReader(file));
 			while ((line = bIn.readLine()) != null) {
-//				System.out.println(line);
+				// System.out.println(line);
 				fileContents.add(line);
 			}
 			bIn.close();
@@ -284,7 +292,7 @@ public class MazePathFinder {
 			return grid;
 		} catch (Exception e) {
 			// remove this later
-			System.out.println("Exception: " + e);
+			// System.out.println("Exception: " + e);
 			return null;
 		}
 	}
@@ -296,7 +304,7 @@ public class MazePathFinder {
 			char c = ' ';
 			while ((value = br.read()) != -1) {
 				c = (char) value;
-//				System.out.print(c);
+				// System.out.print(c);
 			}
 			br.close();
 			if (c == '\n') {
