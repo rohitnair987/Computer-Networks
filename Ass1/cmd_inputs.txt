@@ -1,0 +1,18 @@
+javac MazePathFinder.java
+
+java MazePathFinder 1 ../testdata/task1.in.1
+java MazePathFinder 1 ../testdata/task1.in.2
+
+java MazePathFinder 1 ../testdata/task1.in.1 > ../testdata/task1.out.1
+
+java MazePathFinder 2 ../testdata/task2.in.1
+java MazePathFinder 2 ../testdata/task2.in.2
+java MazePathFinder 2 ../testdata/task2.in.3
+
+java MazePathFinder 3 ../testdata/task3.in.1
+java MazePathFinder 3 ../testdata/task3.in.2
+java MazePathFinder 3 ../testdata/task3.in.3
+
+java MazePathFinder 4 ../testdata/task4.in.1
+java MazePathFinder 4 ../testdata/task4.in.2
+java MazePathFinder 4 ../testdata/task4.in.3
