@@ -45,7 +45,7 @@ public class MazePathFinder {
 				System.out.println("NO");
 			}
 			else {
-//				display(maze);
+				// display(maze);
 
 				// ********* Task 1 *********
 				if (task.equals("1")) {
@@ -225,7 +225,7 @@ public class MazePathFinder {
 		int sourceCount = 0, destinationCount = 0;
 		int noOfColumns = grid[0].length;
 		for (int i = 0; i < grid.length; i++) {
-//			System.out.println(grid[i].length);
+			// System.out.println(grid[i].length);
 			if (grid[i].length != noOfColumns) {
 				System.out.print("Not an m*n matrix ");
 				return false;
@@ -264,25 +264,16 @@ public class MazePathFinder {
 		String line = "";
 		char grid[][];
 		ArrayList<String> fileContents = new ArrayList<String>();
-		// boolean emptyLinePresent = false;
+
 		try {
+			if (!isLastCharNewLine(file)) {
+				return null;
+			}
+
 			BufferedReader bIn = new BufferedReader(new FileReader(file));
 			while ((line = bIn.readLine()) != null) {
-//				System.out.print(line);
+//				System.out.println(line);
 				fileContents.add(line);
-				// if (line.isEmpty()) {
-				// emptyLinePresent = true;
-				// }
-				// else {
-				// if (emptyLinePresent) {
-				// // System.out.println("Illegal file");
-				// bIn.close();
-				// return null;
-				// }
-				// else {
-				// fileContents.add(line);
-				// }
-				// }
 			}
 			bIn.close();
 
@@ -296,5 +287,24 @@ public class MazePathFinder {
 			System.out.println("Exception: " + e);
 			return null;
 		}
+	}
+
+	private static boolean isLastCharNewLine(String file) {
+		int value = 0;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			char c = ' ';
+			while ((value = br.read()) != -1) {
+				c = (char) value;
+//				System.out.print(c);
+			}
+			br.close();
+			if (c == '\n') {
+				return true;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		return false;
 	}
 }
