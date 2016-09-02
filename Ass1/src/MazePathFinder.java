@@ -103,16 +103,15 @@ public class MazePathFinder {
 		boolean visited[][] = new boolean[m][n];
 		Point teleportPoints[][] = findTeleportPoints(maze);
 
-		System.out.println("tele: " + teleportPoints.length + ", " + teleportPoints[0].length);
-		for (int i = 0; i < teleportPoints.length; i++) {
-			for (int j = 0; j < teleportPoints[0].length; j++) {
-
-				if (teleportPoints[i][j] != null) {
-					System.out.print(i + " " + j + ": ");
-					teleportPoints[i][j].display();
-				}
-			}
-		}
+		//display teleport points
+//		for (int i = 0; i < teleportPoints.length; i++) {
+//			for (int j = 0; j < teleportPoints[0].length; j++) {
+//				if (teleportPoints[i][j] != null) {
+//					System.out.print(i + " " + j + ": ");
+//					teleportPoints[i][j].display();
+//				}
+//			}
+//		}
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
@@ -124,12 +123,8 @@ public class MazePathFinder {
 
 			if (isNumber(maze[p.x][p.y])) {
 				String path = p.path;
-				System.out.print("found ");
-				p.display();
 				p = findMatchingPair(teleportPoints, p, Character.getNumericValue(maze[p.x][p.y]));
 				p.path = path;
-				System.out.print("returned ");
-				p.display();
 			}
 
 			visited[p.x][p.y] = true;
@@ -154,13 +149,11 @@ public class MazePathFinder {
 
 	private static Point[][] findTeleportPoints(char[][] maze) {
 		Point teleportPoints[][] = new Point[10][2];
-		System.out.println(teleportPoints[0][0]);
 
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[0].length; j++) {
 				if (isNumber(maze[i][j])) {
 					int digit = Character.getNumericValue(maze[i][j]);
-					System.out.println(digit + " at " + i + "," + j);
 					if (teleportPoints[digit][0] == null) {
 						teleportPoints[digit][0] = new Point(i, j);
 					} else {
