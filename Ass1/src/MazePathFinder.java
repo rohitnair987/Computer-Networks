@@ -35,25 +35,24 @@ public class MazePathFinder {
 
 		if (args.length == 0) {
 			System.out.println("Please enter an argument (task number) as 1, 2, 3 or 4");
-		}
-		else {
+		} else {
 			String task = args[0];
 
 			char maze[][] = getMazeData();
 			if (maze == null) {
-				System.out.println("NO");
-			}
-			else {
-				//display maze:
+				System.out.println("NOo");
+			} else {
+				// display maze:
 				// for (int i = 0; i < maze.length; i++) {
 				// for (int j = 0; j < maze[0].length; j++) {
 				// System.out.print(maze[i][j]);
 				// }
 				// System.out.println();
 				// }
-				
+
 				// ********* Task 1 *********
 				if (task.equals("1")) {
+					System.out.println("task 1");
 					System.out.println(isMazeLegal(maze) ? "YES" : "NO");
 				}
 
@@ -66,8 +65,7 @@ public class MazePathFinder {
 				else if (task.equals("3")) {
 					if (doesSolutionExist(maze)) {
 						shortestPathBFS(maze);
-					}
-					else {
+					} else {
 						System.out.println("NO");
 					}
 				}
@@ -75,8 +73,7 @@ public class MazePathFinder {
 				// ********* Task 4 *********
 				else if (task.equals("4")) {
 					shortestPathTeleporter(maze);
-				}
-				else {
+				} else {
 					System.out.println("Please enter first argument (task number) as 1, 2, 3 or 4");
 				}
 			}
@@ -105,16 +102,20 @@ public class MazePathFinder {
 			}
 
 			visited[p.x][p.y] = true;
-			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D' || isNumber(maze[p.x + 1][p.y]))) {
+			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd'
+					|| maze[p.x + 1][p.y] == 'D' || isNumber(maze[p.x + 1][p.y]))) {
 				q.add(new Point(p.x + 1, p.y, p.path + "D"));
 			}
-			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D' || isNumber(maze[p.x - 1][p.y]))) {
+			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd'
+					|| maze[p.x - 1][p.y] == 'D' || isNumber(maze[p.x - 1][p.y]))) {
 				q.add(new Point(p.x - 1, p.y, p.path + "U"));
 			}
-			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D' || isNumber(maze[p.x][p.y + 1]))) {
+			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd'
+					|| maze[p.x][p.y + 1] == 'D' || isNumber(maze[p.x][p.y + 1]))) {
 				q.add(new Point(p.x, p.y + 1, p.path + "R"));
 			}
-			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D' || isNumber(maze[p.x][p.y - 1]))) {
+			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd'
+					|| maze[p.x][p.y - 1] == 'D' || isNumber(maze[p.x][p.y - 1]))) {
 				q.add(new Point(p.x, p.y - 1, p.path + "L"));
 			}
 		}
@@ -179,16 +180,20 @@ public class MazePathFinder {
 		int m = maze.length;
 		int n = maze[0].length;
 		visited[p.x][p.y] = true;
-		if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D')) {
+		if (p.x + 1 < m && !visited[p.x + 1][p.y]
+				&& (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D')) {
 			q.add(new Point(p.x + 1, p.y, p.path + "D"));
 		}
-		if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D')) {
+		if (p.x - 1 >= 0 && !visited[p.x - 1][p.y]
+				&& (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'd' || maze[p.x - 1][p.y] == 'D')) {
 			q.add(new Point(p.x - 1, p.y, p.path + "U"));
 		}
-		if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D')) {
+		if (p.y + 1 < n && !visited[p.x][p.y + 1]
+				&& (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'd' || maze[p.x][p.y + 1] == 'D')) {
 			q.add(new Point(p.x, p.y + 1, p.path + "R"));
 		}
-		if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D')) {
+		if (p.y - 1 >= 0 && !visited[p.x][p.y - 1]
+				&& (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'd' || maze[p.x][p.y - 1] == 'D')) {
 			q.add(new Point(p.x, p.y - 1, p.path + "L"));
 		}
 	}
@@ -208,18 +213,20 @@ public class MazePathFinder {
 		int sourceCount = 0, destinationCount = 0;
 		int noOfColumns = grid[0].length;
 		for (int i = 0; i < grid.length; i++) {
+			System.out.println("cols:" + grid[i].length);
 			if (grid[i].length != noOfColumns) {
+				System.out.println("cols not equal");
 				return false;
 			}
 			for (int j = 0; j < noOfColumns; j++) {
 				if (grid[i][j] == 'S') {
 					sourceCount++;
-				}
-				else if (grid[i][j] == 'D') {
+				} else if (grid[i][j] == 'D') {
 					destinationCount++;
-				}
-				else if (!(grid[i][j] == '.' || grid[i][j] == '#'
+				} else if (!(grid[i][j] == '.' || grid[i][j] == '#'
 				/* || !isNumber(grid[i][j]) */)) {
+					System.out.println("nothing matched");
+					System.out.println(grid[i][j]);
 					return false;
 				}
 			}
@@ -240,34 +247,71 @@ public class MazePathFinder {
 		try {
 			while (true) {
 				c = br.read();
-				line = (char) c;
-				
-				// Incorrect char in input such as ' ', d etc.
-				if (c != -1 && !isValid(line)) { 
-					return null;
-				}
-				// Blank line
-				if (line == '\n' && last == '\n') {
-					return null;
-				}
 				// EOF reached - break
 				if (c == -1) {
+					System.out.println("break");
 					break;
 				}
+				line = (char) c;
+				// System.out.println("c:" + c + ", line:" + line);
+
+				// Incorrect char in input such as ' ', d etc.
+				if (c != -1 && !isValid(line)) {
+					System.out.println("Incorrect char in input " + line + " such as ' ', d etc.");
+					return null;
+				}
+				if (line == '\n') {
+					System.out.println("blank");
+					// continue;
+				}
+				if (line == '\r') {
+					System.out.println("return");
+					 continue;
+				}
+
+				// Blank line
+				if ((line == '\n' && last == '\n') || (line == '\r' && last == '\r')) {
+					System.out.println("Blank line");
+					return null;
+				}
+
+				if (!isValid(line)) {
+					System.out.println("Invalid char in input " + line + " such as ' ', d etc.");
+				}
+				// else {
+				// System.out.println("Valid char in input " + line + " such as
+				// ' ', d etc.");
+				// }
 				last = line;
 
-				if (line != '\n') {
+				if (last != '\n' && last != '\r') {
+					// System.out.println("if");
 					inputLine += line;
-				}
-				else {
+				} else {
+					// System.out.println("else");
 					fileContents.add(inputLine);
+					System.out.print(inputLine);
 					inputLine = "";
 				}
 			}
-
-			if (last != '\n') { // if last line doesn've have a CR
+			br.close();
+			System.out.println("im out\n\n");
+			if (line == '\n') {
+				System.out.println("this is n");
+			} else {
+				System.out.println("if last line doesn've have a CR");
 				return null;
 			}
+			System.out.println("try n \n here");
+			// System.out.println("try r \r here");
+			System.out.println("last line is " + line + " thanku");
+			// if (!(last == '\n') || (last != '\r')) { // if last line doesn've
+			// // have a CR
+			// if (line != '\n') { // if last line doesn've
+			// // have a CR
+			// System.out.println("if last line doesn've have a CR");
+			// return null;
+			// }
 
 			grid = new char[fileContents.size()][fileContents.get(0).length()];
 			for (int i = 0; i < fileContents.size(); i++) {
@@ -279,12 +323,13 @@ public class MazePathFinder {
 			System.out.println("Exception occured. Below is its Stack Trace:");
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
 	private static boolean isValid(char last) {
-		if (last == '#' || last == '.' || last == 'S' || last == 'D' || last == '\n' || last == '?' || isNumber(last)) {
+		if (last == '#' || last == '.' || last == 'S' || last == 'D' || last == '\n' || last == '\r' || last == '?'
+				|| isNumber(last)) {
 			return true;
 		}
 		return false;
