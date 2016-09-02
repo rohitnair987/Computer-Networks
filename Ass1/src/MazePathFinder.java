@@ -23,6 +23,22 @@ class Point {
 		y = b;
 		path = p;
 	}
+
+	public void display() {
+		System.out.print("Point: (" + x + "," + y + ")");
+		if (path != "") {
+			System.out.print(" and Path: " + path);
+		}
+		System.out.println();
+	}
+
+	public boolean isEqual(Point p) {
+		if (p.x == x && p.y == y) {
+			return true;
+		}
+		return false;
+	}
+
 }
 
 public class MazePathFinder {
@@ -40,7 +56,7 @@ public class MazePathFinder {
 
 			char maze[][] = getMazeData();
 			if (maze == null) {
-				System.out.println("NOo");
+				System.out.println("NO");
 			} else {
 				// display maze:
 				// for (int i = 0; i < maze.length; i++) {
@@ -52,7 +68,6 @@ public class MazePathFinder {
 
 				// ********* Task 1 *********
 				if (task.equals("1")) {
-					System.out.println("task 1");
 					System.out.println(isMazeLegal(maze) ? "YES" : "NO");
 				}
 
@@ -86,6 +101,18 @@ public class MazePathFinder {
 		Queue<Point> q = new LinkedList<Point>();
 		q.add(findSource(maze));
 		boolean visited[][] = new boolean[m][n];
+		Point teleportPoints[][] = findTeleportPoints(maze);
+
+		System.out.println("tele: " + teleportPoints.length + ", " + teleportPoints[0].length);
+		for (int i = 0; i < teleportPoints.length; i++) {
+			for (int j = 0; j < teleportPoints[0].length; j++) {
+
+				if (teleportPoints[i][j] != null) {
+					System.out.print(i + " " + j + ": ");
+					teleportPoints[i][j].display();
+				}
+			}
+		}
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
@@ -97,8 +124,12 @@ public class MazePathFinder {
 
 			if (isNumber(maze[p.x][p.y])) {
 				String path = p.path;
-				p = findMatchingPair(maze, p);
+				System.out.print("found ");
+				p.display();
+				p = findMatchingPair(teleportPoints, p, Character.getNumericValue(maze[p.x][p.y]));
 				p.path = path;
+				System.out.print("returned ");
+				p.display();
 			}
 
 			visited[p.x][p.y] = true;
@@ -121,17 +152,32 @@ public class MazePathFinder {
 		}
 	}
 
-	private static Point findMatchingPair(char[][] maze, Point p) {
+	private static Point[][] findTeleportPoints(char[][] maze) {
+		Point teleportPoints[][] = new Point[10][2];
+		System.out.println(teleportPoints[0][0]);
+
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[0].length; j++) {
-				if (maze[i][j] == maze[p.x][p.y]) {
-					if (!(i == p.x && j == p.y)) {
-						return new Point(i, j);
+				if (isNumber(maze[i][j])) {
+					int digit = Character.getNumericValue(maze[i][j]);
+					System.out.println(digit + " at " + i + "," + j);
+					if (teleportPoints[digit][0] == null) {
+						teleportPoints[digit][0] = new Point(i, j);
+					} else {
+						teleportPoints[digit][1] = new Point(i, j);
 					}
 				}
 			}
 		}
-		return null;
+
+		return teleportPoints;
+	}
+
+	private static Point findMatchingPair(Point[][] teleportPoints, Point p, int value) {
+		if (teleportPoints[value][0].isEqual(p)) {
+			return teleportPoints[value][1];
+		}
+		return teleportPoints[value][0];
 	}
 
 	private static boolean isNumber(char c) {
@@ -213,9 +259,7 @@ public class MazePathFinder {
 		int sourceCount = 0, destinationCount = 0;
 		int noOfColumns = grid[0].length;
 		for (int i = 0; i < grid.length; i++) {
-			System.out.println("cols:" + grid[i].length);
 			if (grid[i].length != noOfColumns) {
-				System.out.println("cols not equal");
 				return false;
 			}
 			for (int j = 0; j < noOfColumns; j++) {
@@ -225,8 +269,6 @@ public class MazePathFinder {
 					destinationCount++;
 				} else if (!(grid[i][j] == '.' || grid[i][j] == '#'
 				/* || !isNumber(grid[i][j]) */)) {
-					System.out.println("nothing matched");
-					System.out.println(grid[i][j]);
 					return false;
 				}
 			}
@@ -249,69 +291,38 @@ public class MazePathFinder {
 				c = br.read();
 				// EOF reached - break
 				if (c == -1) {
-					System.out.println("break");
 					break;
 				}
 				line = (char) c;
-				// System.out.println("c:" + c + ", line:" + line);
 
 				// Incorrect char in input such as ' ', d etc.
 				if (c != -1 && !isValid(line)) {
-					System.out.println("Incorrect char in input " + line + " such as ' ', d etc.");
 					return null;
 				}
-				if (line == '\n') {
-					System.out.println("blank");
-					// continue;
-				}
+
 				if (line == '\r') {
-					System.out.println("return");
-					 continue;
+					continue;
 				}
 
 				// Blank line
 				if ((line == '\n' && last == '\n') || (line == '\r' && last == '\r')) {
-					System.out.println("Blank line");
 					return null;
 				}
 
-				if (!isValid(line)) {
-					System.out.println("Invalid char in input " + line + " such as ' ', d etc.");
-				}
-				// else {
-				// System.out.println("Valid char in input " + line + " such as
-				// ' ', d etc.");
-				// }
 				last = line;
 
 				if (last != '\n' && last != '\r') {
-					// System.out.println("if");
 					inputLine += line;
 				} else {
-					// System.out.println("else");
 					fileContents.add(inputLine);
-					System.out.print(inputLine);
 					inputLine = "";
 				}
 			}
+
 			br.close();
-			System.out.println("im out\n\n");
-			if (line == '\n') {
-				System.out.println("this is n");
-			} else {
-				System.out.println("if last line doesn've have a CR");
+			if (line != '\n') {
 				return null;
 			}
-			System.out.println("try n \n here");
-			// System.out.println("try r \r here");
-			System.out.println("last line is " + line + " thanku");
-			// if (!(last == '\n') || (last != '\r')) { // if last line doesn've
-			// // have a CR
-			// if (line != '\n') { // if last line doesn've
-			// // have a CR
-			// System.out.println("if last line doesn've have a CR");
-			// return null;
-			// }
 
 			grid = new char[fileContents.size()][fileContents.get(0).length()];
 			for (int i = 0; i < fileContents.size(); i++) {
