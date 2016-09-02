@@ -38,9 +38,6 @@ public class MazePathFinder {
 		}
 		else {
 			String task = args[0];
-			// String file = args[1];
-
-			// System.out.println(file);
 
 			char maze[][] = getMazeData();
 			if (maze == null) {
@@ -48,13 +45,13 @@ public class MazePathFinder {
 			}
 			else {
 
-				for (int i = 0; i < maze.length; i++) {
-//					System.out.print(maze[i].length + " ");
-					for (int j = 0; j < maze[0].length; j++) {
-						System.out.print(maze[i][j]);
-					}
-					System.out.println();
-				}
+//				for (int i = 0; i < maze.length; i++) {
+////					System.out.print(maze[i].length + " ");
+//					for (int j = 0; j < maze[0].length; j++) {
+//						System.out.print(maze[i][j]);
+//					}
+//					System.out.println();
+//				}
 				// ********* Task 1 *********
 				if (task.equals("1")) {
 					System.out.println(isMazeLegal(maze) ? "YES" : "NO");
@@ -331,7 +328,7 @@ public class MazePathFinder {
 	}
 
 	private static boolean isValid(char last) {// handles 4(space) and 5(d)
-		if (last == '#' || last == '.' || last == 'S' || last == 'D' || last == '\n' || last == '?') {
+		if (last == '#' || last == '.' || last == 'S' || last == 'D' || last == '\n' || last == '?'||isNumber(last)) {
 			return true;
 		}
 		return false;
