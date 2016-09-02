@@ -1,5 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
 import java.util.*;
 
 class Point {
@@ -28,58 +27,60 @@ class Point {
 
 public class MazePathFinder {
 	public static void main(String[] args) {
+
+		/*
+		 * to find matching teleport point calculate a dict of tele points pass
+		 * it to the findMatching
+		 */
+
 		if (args.length == 0) {
 			System.out.println("Please enter an argument (task number) as 1, 2, 3 or 4");
 		}
 		else {
 			String task = args[0];
-			// Scanner cIn = new Scanner(System.in);
-			// String file = cIn.next();
-			// cIn.close();
-			// String file = "testdata/task1.in.1";
-			String file = args[1];
-			// System.out.println("File: " + file + "\n");
+			// String file = args[1];
 
-			char maze[][] = getFileData(file);
+			// System.out.println(file);
+
+			char maze[][] = getMazeData();
 			if (maze == null) {
-				System.out.print("NO");
+				System.out.println("NO");
 			}
 			else {
-				// display(maze);
 
+				for (int i = 0; i < maze.length; i++) {
+//					System.out.print(maze[i].length + " ");
+					for (int j = 0; j < maze[0].length; j++) {
+						System.out.print(maze[i][j]);
+					}
+					System.out.println();
+				}
 				// ********* Task 1 *********
 				if (task.equals("1")) {
-					// System.out.print("\nTask 1: Is the Maze Legal?: ");
-					System.out.print(isMazeLegal(maze) ? "YES" : "NO");
+					System.out.println(isMazeLegal(maze) ? "YES" : "NO");
 				}
 
 				// ********* Task 2 *********
 				else if (task.equals("2")) {
-					// System.out.print("\nTask 2: Is there a solution?: ");
-					System.out.print(doesSolutionExist(maze) ? "YES" : "NO");
+					System.out.println(doesSolutionExist(maze) ? "YES" : "NO");
 				}
 
 				// ********* Task 3 *********
 				else if (task.equals("3")) {
-
-					// System.out.println("\nTask 3: Shortest path to
-					// destination: ");
-					if(doesSolutionExist(maze)){
+					if (doesSolutionExist(maze)) {
 						shortestPathBFS(maze);
 					}
 					else {
-						System.out.print("NO");
+						System.out.println("NO");
 					}
 				}
 
 				// ********* Task 4 *********
 				else if (task.equals("4")) {
-					// System.out.println("\nTask 4: Shortest path with
-					// Teleporter: ");
 					shortestPathTeleporter(maze);
 				}
 				else {
-					System.out.print("Please enter first argument (task number) as 1, 2, 3 or 4");
+					System.out.println("Please enter first argument (task number) as 1, 2, 3 or 4");
 				}
 			}
 		}
@@ -94,18 +95,9 @@ public class MazePathFinder {
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
-			// System.out.print(p.x + " " + p.y + " " + p.path + ", maze: " +
-			// maze[p.x][p.y] + " -- Queue: ");
-			// Queue<Point> q2 = new LinkedList<Point>(q);
-			// while (!q2.isEmpty()) {
-			// Point x = q2.remove();
-			// System.out.print(x.x + "," + x.y + " ");
-			// }
-			// System.out.println();
 
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
-				// replace this syso by writing to file
-				System.out.print(p.path);
+				System.out.println(p.path);
 				break;
 			}
 
@@ -113,10 +105,8 @@ public class MazePathFinder {
 				String path = p.path;
 				p = findMatchingPair(maze, p);
 				p.path = path;
-//				System.out.println("teleport to " + p.x + " " + p.y);
 			}
 
-			// addNeighbors(q, p, visited, maze);
 			visited[p.x][p.y] = true;
 			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'd' || maze[p.x + 1][p.y] == 'D' || isNumber(maze[p.x + 1][p.y]))) {
 				q.add(new Point(p.x + 1, p.y, p.path + "D"));
@@ -134,11 +124,8 @@ public class MazePathFinder {
 	}
 
 	private static Point findMatchingPair(char[][] maze, Point p) {
-		// char x2 = maze[p.x][p.y];
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[0].length; j++) {
-				// char x1 = maze[i][j];
-				// if (maze[i][j] == maze[p.x][p.y] && i != p.x && j != p.y) {
 				if (maze[i][j] == maze[p.x][p.y]) {
 					if (!(i == p.x && j == p.y)) {
 						return new Point(i, j);
@@ -168,7 +155,6 @@ public class MazePathFinder {
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
 				return true;
 			}
-
 			addNeighbors(q, p, visited, maze);
 		}
 		return false;
@@ -183,15 +169,11 @@ public class MazePathFinder {
 
 		while (!q.isEmpty()) {
 			Point p = q.remove();
-			// System.out.println(p.x + " " + p.y + " " + p.path + ", maze:
-			// " + maze[p.x][p.y]);
 
 			if (maze[p.x][p.y] == 'd' || maze[p.x][p.y] == 'D') {
-				// replace this syso by writing to file
-				System.out.print(p.path);
+				System.out.println(p.path);
 				break;
 			}
-
 			addNeighbors(q, p, visited, maze);
 		}
 	}
@@ -226,16 +208,10 @@ public class MazePathFinder {
 	}
 
 	private static boolean isMazeLegal(char[][] grid) {
-		// if (grid == null || grid.length == 0) {
-		// System.out.print("Matrix Empty ");
-		// return false;
-		// }
 		int sourceCount = 0, destinationCount = 0;
 		int noOfColumns = grid[0].length;
 		for (int i = 0; i < grid.length; i++) {
-			// System.out.println(grid[i].length);
 			if (grid[i].length != noOfColumns) {
-				// System.out.print("Not an m*n matrix ");
 				return false;
 			}
 			for (int j = 0; j < noOfColumns; j++) {
@@ -254,47 +230,111 @@ public class MazePathFinder {
 		return sourceCount == 1 && destinationCount == 1;
 	}
 
-	private static void display(char[][] grid) {
-		if (grid != null) {
-			for (int i = 0; i < grid.length; i++) {
-				for (int j = 0; j < grid[i].length; j++) {
-					System.out.print(grid[i][j]);
-				}
-				System.out.println();
-			}
-		}
-		// else {
-		// System.out.println("Nothing to display.");
-		// }
-	}
-
-	private static char[][] getFileData(String file) {
-		String line = "";
+	private static char[][] getMazeData() {
 		char grid[][];
 		ArrayList<String> fileContents = new ArrayList<String>();
 
+		// try {
+		// if (!isLastCharNewLine(file)) {
+		// return null;
+		// }
+
+		int c = 0;
+		char line = 'z';
+		char last = 'y';
+		boolean cr = false;
+//		int i = 0, j = 0;
+		String inputLine = "";
+
+		// Scanner scanner = new Scanner(System.in);
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		try {
-			if (!isLastCharNewLine(file)) {
+			while (true) {
+				c = br.read();
+				line = (char) c;
+				// System.out.print(line);
+				if (c != -1 && !isValid(line)) {
+					System.out.println("\nbhag: " + line + " saale");
+					return null;
+				}
+				// if (line == ' ') {// input 4 (extra space) handled
+				// System.out.println("\nspace");
+				// return null;
+				// }
+				if (line == '\n' && last == '\n') {// handles 3(2 crs)
+					System.out.println("\n2 returns together");
+					return null;
+				}
+				// if (line == '\n' && !isValid(last)) {// input 4 (extra space)
+				// // handled
+				// System.out.println("\n2 returns");
+				// return null;
+				// }
+				if (c == -1) {
+					System.out.println("\nbreaking....");
+					break;
+				}
+				last = line;
+				if (line != '\n') {
+					inputLine += line;
+					// grid[i][j++] = line;
+				}
+				else {
+					fileContents.add(inputLine);
+//					System.out.println(inputLine);
+					inputLine = "";
+					// i++;
+				}
+			}
+			System.out.println("eof char is " + c + " thanku");
+			// System.out.println("last char is " + last + " thanku");
+
+			if (last != '\n') {// input 2 (last line no cr) handled
+				System.out.println("last line doesnt ve cr");
 				return null;
 			}
-
-			BufferedReader bIn = new BufferedReader(new FileReader(file));
-			while ((line = bIn.readLine()) != null) {
-				// System.out.println(line);
-				fileContents.add(line);
+			else {
+				System.out.println("last line is ok");
 			}
-			bIn.close();
-
-			grid = new char[fileContents.size()][fileContents.get(0).toString().length()];
+			System.out.println("dimen: " + fileContents.size() + " x " + fileContents.get(0).length());
+			grid = new char[fileContents.size()][fileContents.get(0).length()];
 			for (int i = 0; i < fileContents.size(); i++) {
-				grid[i] = fileContents.get(i).toString().toCharArray();
+				grid[i] = fileContents.get(i).toCharArray();
 			}
+			// if(line == null) {
+			// System.out.println("invalid");
+			// return null;
+			// }
+			// System.out.println("line " + (c++) + " is " + line + " thanku");
+
 			return grid;
-		} catch (Exception e) {
-			// remove this later
-			// System.out.println("Exception: " + e);
-			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		return null;
+
+		// BufferedReader bIn = new BufferedReader(new FileReader(file));
+		// while ((line = bIn.readLine()) != null) {
+		// fileContents.add(line);
+		// }
+		// bIn.close();
+		//
+		// grid = new
+		// char[fileContents.size()][fileContents.get(0).toString().length()];
+		// for (int i = 0; i < fileContents.size(); i++) {
+		// grid[i] = fileContents.get(i).toString().toCharArray();
+		// }
+		// return grid;
+		// } catch (Exception e) {
+		// return null;
+		// }
+	}
+
+	private static boolean isValid(char last) {// handles 4(space) and 5(d)
+		if (last == '#' || last == '.' || last == 'S' || last == 'D' || last == '\n' || last == '?') {
+			return true;
+		}
+		return false;
 	}
 
 	private static boolean isLastCharNewLine(String file) {
@@ -304,7 +344,6 @@ public class MazePathFinder {
 			char c = ' ';
 			while ((value = br.read()) != -1) {
 				c = (char) value;
-				// System.out.print(c);
 			}
 			br.close();
 			if (c == '\n') {
