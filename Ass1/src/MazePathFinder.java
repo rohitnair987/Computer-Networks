@@ -72,7 +72,6 @@ public class MazePathFinder {
 				System.out.println("NO");
 			}
 			else {
-				display(maze);
 
 				// ********* Task 1 *********
 				if (task.equals("1")) {
@@ -102,20 +101,6 @@ public class MazePathFinder {
 					System.out.println("Please enter first argument (task number) as 1, 2, 3 or 4");
 				}
 			}
-		}
-	}
-
-	// Display Maze
-	private static void display(char[][] maze) {
-		if (maze.length > 50) {
-			System.out.println("Large Maze. rows: " + maze.length + "cols: " + maze[0].length);
-			return;
-		}
-		for (int i = 0; i < maze.length; i++) {
-			for (int j = 0; j < maze[0].length; j++) {
-				System.out.print(maze[i][j]);
-			}
-			System.out.println();
 		}
 	}
 
@@ -256,7 +241,6 @@ public class MazePathFinder {
 	}
 
 	private static boolean isMazeLegal(char[][] grid) {
-		System.out.println("isMazeLegal");
 		int sourceCount = 0, destinationCount = 0;
 		int noOfColumns = grid[0].length;
 		for (int i = 0; i < grid.length; i++) {
@@ -283,63 +267,59 @@ public class MazePathFinder {
 		int columns = 5000;
 		char grid[][] = new char[rows][columns];
 
-		int c = 0;
-		char line = 'z';
-		char last = 'y';
+		int inputCharValue = 0;
+		char inputChar = 'z';
+		char previousInputChar = 'y';
+
+		int rowNumber = 0;
+		int columnNumber = 0;
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		try {
-			Date d1 = new Date();
 
-			int rowNumber = 0;
-			int columnNumber = 0;
-
-			while ((c = br.read()) != -1) {
-				line = (char) c;
-				if (line == '\n') {
+			while ((inputCharValue = br.read()) != -1) {
+				inputChar = (char) inputCharValue;
+				if (inputChar == '\n') {
 					rowNumber++;
+					if(rowNumber > 5000){
+						return null;
+					}
 					if (columns == 5000) {
 						columns = columnNumber;
 					}
 					if (columnNumber != columns) {
-						// System.out.println("columns unequal");
 						return null;
 					}
 
 					columnNumber = 0;
 					continue;
 				}
-				grid[rowNumber][columnNumber++] = line;
+				grid[rowNumber][columnNumber++] = inputChar;
+				if(columnNumber > 5000){
+					return null;
+				}
 
 				// Incorrect char in input
-				if (!isValid(line)) {
-					// System.out.println("input not valid");
+				if (!isValid(inputChar)) {
 					return null;
 				}
 
 				// Required for cross-platform support
-				if (line == '\r') {
-					// System.out.println("return");
+				if (inputChar == '\r') {
 					continue;
 				}
 
 				// Blank line
-				if ((line == '\n' && last == '\n') || (line == '\r' && last == '\r')) {
-					// System.out.println("blank");
+				if ((inputChar == '\n' && previousInputChar == '\n') || (inputChar == '\r' && previousInputChar == '\r')) {
 					return null;
 				}
 
-				last = line;
+				previousInputChar = inputChar;
 
 			}
 			br.close();
 
-			Date d2 = new Date();
-			System.out.println("read time: " + (d2.getTime() - d1.getTime()) / 1000.0 + " secs");
-
 			rows = rowNumber;
-			System.out.println("ROWS: " + rows);
-			System.out.println("COLUMNS: " + columns);
 
 			// Minimal grid to return correct input
 			char grid2[][] = new char[rows][columns];
@@ -349,11 +329,7 @@ public class MazePathFinder {
 				}
 			}
 
-			Date d3 = new Date();
-			System.out.println("copy time: " + (d3.getTime() - d2.getTime()) / 1000.0 + " secs");
-
-			if (line != '\n') {
-				// System.out.println("last line not n");
+			if (inputChar != '\n') {
 				return null;
 			}
 
