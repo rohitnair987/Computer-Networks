@@ -10,9 +10,6 @@
 ************************************************************************************************/
 
 import java.io.*;
-import java.nio.file.*;
-import java.nio.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 ///<summary>
@@ -61,8 +58,6 @@ class Point {
 }
 
 public class MazePathFinder {
-	// static int ROWS = 0;
-	// static int COLUMNS = 0;
 
 	public static void main(String[] args) {
 
@@ -73,16 +68,14 @@ public class MazePathFinder {
 			String task = args[0];
 
 			char maze[][] = getMazeData();
-			System.out.println("out of getMazeData");
 			if (maze == null) {
-				System.out.println("getMazeData returned null");
 				System.out.println("NO");
 			}
 			else {
+				display(maze);
 
 				// ********* Task 1 *********
 				if (task.equals("1")) {
-					System.out.println("isMazeLegal from main");
 					System.out.println(isMazeLegal(maze) ? "YES" : "NO");
 				}
 
@@ -109,6 +102,20 @@ public class MazePathFinder {
 					System.out.println("Please enter first argument (task number) as 1, 2, 3 or 4");
 				}
 			}
+		}
+	}
+
+	// Display Maze
+	private static void display(char[][] maze) {
+		if (maze.length > 50) {
+			System.out.println("Large Maze. rows: " + maze.length + "cols: " + maze[0].length);
+			return;
+		}
+		for (int i = 0; i < maze.length; i++) {
+			for (int j = 0; j < maze[0].length; j++) {
+				System.out.print(maze[i][j]);
+			}
+			System.out.println();
 		}
 	}
 
@@ -272,8 +279,6 @@ public class MazePathFinder {
 	}
 
 	private static char[][] getMazeData() {
-		ArrayList<StringBuffer> fileContents = new ArrayList<StringBuffer>();
-
 		int rows = 5000;
 		int columns = 5000;
 		char grid[][] = new char[rows][columns];
@@ -281,35 +286,23 @@ public class MazePathFinder {
 		int c = 0;
 		char line = 'z';
 		char last = 'y';
-		String inputLine = "";
-		StringBuffer everything = new StringBuffer();
-		// String everything = "";
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		try {
 			Date d1 = new Date();
 
-			// int count = 0;
-			// while ((inputLine = br.readLine()) != null)
-			//// System.out.println(count++ + ": " + inputLine);
-			// count++;
-			// System.out.println(count);
-
 			int rowNumber = 0;
 			int columnNumber = 0;
-			int count = 0;
-			int charCount = 0;
+
 			while ((c = br.read()) != -1) {
-				// System.out.print(charCount++ + " ");
 				line = (char) c;
-				// everything.append(String.valueOf(line));
 				if (line == '\n') {
 					rowNumber++;
 					if (columns == 5000) {
 						columns = columnNumber;
 					}
 					if (columnNumber != columns) {
-						System.out.println(columnNumber + " " + columns + " ... col unequal");
+						// System.out.println("columns unequal");
 						return null;
 					}
 
@@ -318,84 +311,53 @@ public class MazePathFinder {
 				}
 				grid[rowNumber][columnNumber++] = line;
 
-				// System.out.print(line);
-
 				// Incorrect char in input
 				if (!isValid(line)) {
-					System.out.println("not valid");
+					// System.out.println("input not valid");
 					return null;
 				}
 
+				// Required for cross-platform support
 				if (line == '\r') {
-					System.out.println("return");
+					// System.out.println("return");
 					continue;
 				}
 
 				// Blank line
 				if ((line == '\n' && last == '\n') || (line == '\r' && last == '\r')) {
-					System.out.println("blank");
+					// System.out.println("blank");
 					return null;
 				}
 
 				last = line;
 
-				// if (last != '\n' && last != '\r') {
-				// continue;// inputLine += line;
-				// }
-				// else {
-				//// System.out.println("count: "+count+" and line: "+
-				// everything);
-				// fileContents.add(everything);
-				// everything=new StringBuffer();
-				//// System.out.println("count: "+count+" and line: "+
-				// everything);
-				//// break;
-				// // inputLine = "";
-				// }
 			}
 			br.close();
+
 			Date d2 = new Date();
 			System.out.println("read time: " + (d2.getTime() - d1.getTime()) / 1000.0 + " secs");
 
 			rows = rowNumber;
-			// COLUMNS = grid[0].length;
-
 			System.out.println("ROWS: " + rows);
 			System.out.println("COLUMNS: " + columns);
 
+			// Minimal grid to return correct input
 			char grid2[][] = new char[rows][columns];
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < columns; j++) {
-					// System.out.print(grid[i][j]);
 					grid2[i][j] = grid[i][j];
 				}
 			}
+
 			Date d3 = new Date();
-
-			// for (int i = 0; i < ROWS; i++) {
-			// for (int j = 0; j < COLUMNS; j++) {
-			// System.out.print(grid2[i][j]);
-			// }
-			//// System.out.println();
-			// }
-
 			System.out.println("copy time: " + (d3.getTime() - d2.getTime()) / 1000.0 + " secs");
 
-			// System.out.println("cols: " + fileContents.get(0).length());
-			// System.out.println("0th index: "+fileContents.get(0));
-
 			if (line != '\n') {
-				System.out.println("last line not n");
+				// System.out.println("last line not n");
 				return null;
 			}
 
-			// grid = new
-			// char[fileContents.size()][fileContents.get(0).length()];
-			// for (int i = 0; i < fileContents.size(); i++) {
-			// grid[i] = fileContents.get(i).toCharArray();
-			// }
-
-			return grid2;// null;// grid;
+			return grid2;
 		} catch (IOException e) {
 			System.out.println("Exception occured. Below is its Stack Trace:");
 			e.printStackTrace();
