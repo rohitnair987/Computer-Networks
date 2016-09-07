@@ -1,0 +1,27 @@
+javac project1.java
+
+java project1 1 < ../project1_testdata/task1/1.in > ../project1_testdata/task1/1.out
+java project1 1 < ../project1_testdata/task1/2.in > ../project1_testdata/task1/2.out
+java project1 1 < ../project1_testdata/task1/3.in > ../project1_testdata/task1/3.out
+java project1 1 < ../project1_testdata/task1/4.in > ../project1_testdata/task1/4.out
+java project1 1 < ../project1_testdata/task1/5.in > ../project1_testdata/task1/5.out
+
+java project1 2 < ../project1_testdata/task2/1.in > ../project1_testdata/task2/1.out
+java project1 2 < ../project1_testdata/task2/2.in > ../project1_testdata/task2/2.out
+java project1 2 < ../project1_testdata/task2/3.in > ../project1_testdata/task2/3.out
+java project1 2 < ../project1_testdata/task2/4.in > ../project1_testdata/task2/4.out
+java project1 2 < ../project1_testdata/task2/5.in > ../project1_testdata/task2/5.out
+
+java project1 3 < ../project1_testdata/task3/1.in > ../project1_testdata/task3/1.out
+java project1 3 < ../project1_testdata/task3/2.in > ../project1_testdata/task3/2.out
+java project1 3 < ../project1_testdata/task3/3.in > ../project1_testdata/task3/3.out
+java project1 3 < ../project1_testdata/task3/4.in > ../project1_testdata/task3/4.out
+java project1 3 < ../project1_testdata/task3/5.in > ../project1_testdata/task3/5.out
+java project1 3 < ../project1_testdata/task3/6.in > ../project1_testdata/task3/6.out
+
+java project1 4 < ../project1_testdata/task4/1.in > ../project1_testdata/task4/1.out
+java project1 4 < ../project1_testdata/task4/2.in > ../project1_testdata/task4/2.out
+java project1 4 < ../project1_testdata/task4/3.in > ../project1_testdata/task4/3.out
+java project1 4 < ../project1_testdata/task4/4.in > ../project1_testdata/task4/4.out
+java project1 4 < ../project1_testdata/task4/5.in > ../project1_testdata/task4/5.out
+java project1 4 < ../project1_testdata/task4/6.in > ../project1_testdata/task4/6.out
