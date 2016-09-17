@@ -60,7 +60,7 @@ class Point {
 public class project1 {
 
 	public static void main(String[] args) {
-
+		System.out.println("aaa");
 		if (args.length == 0) {
 			System.out.println("Please enter an argument (task number) as 1, 2, 3 or 4");
 		}

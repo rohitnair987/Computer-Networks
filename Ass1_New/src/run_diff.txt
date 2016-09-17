@@ -1,0 +1,14 @@
+diff ../testdata/task1.out.1 ../testdata_original/task1.out.1
+diff ../testdata/task1.out.2 ../testdata_original/task1.out.2
+diff ../testdata/task1.out.3 ../testdata_original/task1.out.3
+diff ../testdata/task1.out.4 ../testdata_original/task1.out.4
+diff ../testdata/task1.out.5 ../testdata_original/task1.out.5
+
+diff ../testdata/task2.out.1 ../testdata_original/task2.out.1
+diff ../testdata/task2.out.2 ../testdata_original/task2.out.2
+
+diff ../testdata/task3.out.1 ../testdata_original/task3.out.1
+diff ../testdata/task3.out.2 ../testdata_original/task3.out.2
+
+diff ../testdata/task4.out.1 ../testdata_original/task4.out.1
+diff ../testdata/task4.out.2 ../testdata_original/task4.out.2
