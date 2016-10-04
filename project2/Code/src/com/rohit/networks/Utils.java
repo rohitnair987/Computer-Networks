@@ -115,7 +115,10 @@ public class Utils {
 
 	// Update counts of packet types to output object
 	public static void updateOutputValues(PCAPData pcapData, Output out) {
-		System.out.println(pcapData.ipHeader.TransportLayerProtocol);
+		if(pcapData.ipHeader.Version == 4) {
+			out.Task1.IPPackets++;
+		}
+		
 		switch (pcapData.ipHeader.TransportLayerProtocol) {
 		case UDP:
 			out.Task1.UDPPackets++;

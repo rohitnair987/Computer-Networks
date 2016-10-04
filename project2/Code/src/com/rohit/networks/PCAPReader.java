@@ -37,9 +37,7 @@ public class PCAPReader {
 	public static PCAPData readPCAPData(long packetLengthFromPCAPHeader) throws IOException {
 		PCAPData pcapData = new PCAPData();
 
-		// System.out.println("l:" + packetLengthFromPCAPHeader);
 		String packet = Utils.readBytesAsStringBigEndian(packetLengthFromPCAPHeader);
-		// System.out.print("p:" + packet.substring(0, 14 * 2) + " ");
 
 		// Fixed Link Header Length .... (* 2 is because each byte is 2
 		// characters)
@@ -60,6 +58,7 @@ public class PCAPReader {
 
 	private static void readLinkHeader(LinkHeader linkHeader, String packetLinkHeader) throws IOException {
 		// Destination and source - skip first 12 bytes
+
 		if (packetLinkHeader.substring(12 * 2).equals("0800")) {
 			linkHeader.ipVersion = 4;
 		} else {
@@ -108,7 +107,6 @@ public class PCAPReader {
 	private static void readTransportHeader(TransportHeader transportHeader, IPHeader ipHeader,
 			String packetTCPHeader) {
 		int CurrentOffset = 0;
-		System.out.println(ipHeader.TransportLayerProtocol);
 
 		switch (ipHeader.TransportLayerProtocol) {
 
@@ -172,7 +170,7 @@ public class PCAPReader {
 			break;
 
 		case ICMP:
-			// Utils.skipBytes(ipHeader.TotalLength - ipHeader.HeaderLength);
+			// Not working with these as of now
 			break;
 
 		default:
