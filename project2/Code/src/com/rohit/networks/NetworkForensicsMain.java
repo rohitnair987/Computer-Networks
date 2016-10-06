@@ -33,9 +33,7 @@ public class NetworkForensicsMain {
 		Output out = new Output();
 
 		Map<Integer, PCAPData> allPCAPDataPackets = new HashMap<Integer, PCAPData>();
-		Map<String, Integer> tcpConnections = new HashMap<String, Integer>();
-		HashSet<String> tcpConnections4Tuple = new HashSet<String>();
-		HashMap<Integer, ArrayList<Integer>> tcpConnections2 = new HashMap<Integer, ArrayList<Integer>>();
+		HashMap<Integer, ArrayList<Integer>> tcpConnections = new HashMap<Integer, ArrayList<Integer>>();
 
 		int packetNumber = 1;
 
@@ -67,55 +65,26 @@ public class NetworkForensicsMain {
 				System.out.println("dest:" + dest);
 
 				int key = src.toString().hashCode() + dest.toString().hashCode();
-				System.out.println("key :" + key + " = " + src.toString().hashCode() + " + " + dest.toString().hashCode());
-				
-				if (!tcpConnections2.containsKey(key)) {
+				if (!tcpConnections.containsKey(key)) {
 					tcpConnectionKey = new ArrayList<Integer>(packetNumber);
-					tcpConnections2.put(key, tcpConnectionKey);
+					tcpConnections.put(key, tcpConnectionKey);
 				} else {
-					tcpConnectionKey = tcpConnections2.get(key);
+					tcpConnectionKey = tcpConnections.get(key);
 					tcpConnectionKey.add(packetNumber);
-					tcpConnections2.replace(key, tcpConnectionKey);
+					tcpConnections.replace(key, tcpConnectionKey);
 				}
-
-				String s1 = src.append(dest).toString();
-				String s2 = dest.append(src).toString();
-
-				// testing
-				// s1 = "\n" + s1;
-				// s2 = "\n" + s2;
-
-				tcpConnections4Tuple.add(s1);
-				tcpConnections4Tuple.add(s2);
-
-				if (tcpConnections.containsKey(s1)) {
-					tcpConnections.put(s1, tcpConnections.get(s1) + 1);
-					tcpConnections.put(s2, tcpConnections.get(s2) + 1);
-				} else {
-					tcpConnections.put(s1, 1);
-					tcpConnections.put(s2, 1);
-				}
-
-				packetNumber++;
 			}
-
-			// System.out.println("\n" + pcapData.ipHeader.Source + " " +
-			// pcapData.transportHeader.SourcePort + " ");
-			// System.out.println(pcapData.ipHeader.Destination + " " +
-			// pcapData.transportHeader.DestinationPort);
-
+			
+			packetNumber++;
 			// break;
 		}
 		System.out.println();
 
 		if (taskNumber == 1) {
 			out.Task1.TotalPackets = packetNumber - 1;
-			System.out.println("tcpConnections:" + tcpConnections.size());
-			// System.out.println(tcpConnections);
-			System.out.println("tcpConnections2:" + tcpConnections2.size());
-			out.Task1.TCPConnections = (int) Math.ceil(tcpConnections.size() / 2.0);
+			out.Task1.TCPConnections = tcpConnections.size();
 		}
-		// out.display(taskNumber);
+		 out.display(taskNumber);
 
 		// System.out.println("\nTime taken = " + (new Date().getTime() - d1) +
 		// "ms");
