@@ -1,6 +1,7 @@
 package com.rohit.networks;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class PCAPReader {
 
@@ -49,9 +50,16 @@ public class PCAPReader {
 		// To-do: pass upper limit of string
 		readIPHeader(pcapData.ipHeader, packet.substring(currentOffset));
 		currentOffset += 2 * pcapData.ipHeader.HeaderLength;
+		// System.out.println(pcapData.ipHeader.HeaderLength + "
+		// "+pcapData.ipHeader.TotalLength);
 
 		// To-do: pass upper limit of string
 		readTransportHeader(pcapData.transportHeader, pcapData.ipHeader, packet.substring(currentOffset));
+		currentOffset += 2 * Math.max(pcapData.transportHeader.Length, pcapData.transportHeader.Offset);
+		System.out.println("toff:" + pcapData.transportHeader.Offset + " " + pcapData.transportHeader.Length);
+
+//		readData(pcapData, packet.substring(currentOffset));
+//		System.out.println("currentOffset:" + currentOffset);
 
 		return pcapData;
 	}
@@ -179,4 +187,28 @@ public class PCAPReader {
 		}
 	}
 
+	private static void readData(PCAPData pcapData, String packetData) {
+		System.out.println(packetData);
+		if (pcapData.ipHeader.TransportLayerProtocol == ConstantsEnum.TCP && packetData.length() > 0) {
+			System.out.println("str:" + decode(packetData).toString());
+		}
+	}
+
+	public static String decode(String hex) {
+
+		String[] list = hex.split("(?<=\\G.{2})");
+		ByteBuffer buffer = ByteBuffer.allocate(list.length);
+		System.out.println(list.length);
+		StringBuffer sb = new StringBuffer();
+		for (String str : list) {
+			// System.out.println("list:"+str);
+			int decimal = Integer.parseInt(str, 16);
+			sb.append((char) decimal);
+			// buffer.put(Byte.parseByte(str, 16));
+		}
+		// System.out.println("sb:"+sb);
+		return sb.toString();
+
+	}
+	// 980 979 644 72
 }

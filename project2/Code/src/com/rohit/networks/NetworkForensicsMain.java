@@ -6,7 +6,7 @@ import java.util.*;
 public class NetworkForensicsMain {
 
 	public static void main(String[] args) throws IOException {
-		// long d1 = new Date().getTime();
+		long d1 = new Date().getTime();
 		// if(args.length != 1) {
 		// System.out.println("Please enter task number");
 		// System.exit(1);
@@ -21,7 +21,10 @@ public class NetworkForensicsMain {
 
 		int taskNumber = 1;
 
-		PCAPGlobalHeader pcapGlobalHeader = PCAPReader.readPCAPGlobalHeader();
+		// Skip global header
+		Utils.skipBytes(24);
+		// PCAPGlobalHeader pcapGlobalHeader =
+		// PCAPReader.readPCAPGlobalHeader();
 		// System.out.println("Snaplength = " + pcapGlobalHeader.Snaplength);
 		// System.out.println("LinkLayerProtocol = " +
 		// pcapGlobalHeader.LinkLayerProtocol);
@@ -38,30 +41,29 @@ public class NetworkForensicsMain {
 
 		while (System.in.available() > 0) {
 			// while (packetNumber < 20) {
-			System.out.print("\n" + packetNumber + ": ");
-			pcapHeader = PCAPReader.readPCAPHeader();
+			System.out.println("\n" + packetNumber + ": ");
 
+			// Read PCAP Header of each packet
+			pcapHeader = PCAPReader.readPCAPHeader();
 			if (pcapHeader.NumberOfOctetsOfPacket != pcapHeader.ActualLengthOfPacket) {
 				System.out.println("\nNot a valid packet!");
 				System.exit(0);
 			}
 
+			// Read the packet
 			pcapData = PCAPReader.readPCAPData(pcapHeader.ActualLengthOfPacket);
 
+			// Store the packet
 			allPCAPDataPackets.put(packetNumber, pcapData);
 
-			Utils.updateOutputValues(pcapData, out, taskNumber);
-
 			if (pcapData.ipHeader.TransportLayerProtocol == ConstantsEnum.TCP) {
-				StringBuilder src = new StringBuilder();
-				src.append(pcapData.ipHeader.Source).append(":").append(pcapData.transportHeader.SourcePort);
-				StringBuilder dest = new StringBuilder();
-				dest.append(pcapData.ipHeader.Destination).append(":").append(pcapData.transportHeader.DestinationPort);
+//				StringBuilder src = new StringBuilder();
+//				src.append(pcapData.ipHeader.Source).append(":").append(pcapData.transportHeader.SourcePort);
+//				StringBuilder dest = new StringBuilder();
+//				dest.append(pcapData.ipHeader.Destination).append(":").append(pcapData.transportHeader.DestinationPort);
 
-				System.out.println("\nsrc :" + src);
-				System.out.println("dest:" + dest);
-
-				int key = src.toString().hashCode() + dest.toString().hashCode();
+				int key = new StringBuilder().append(pcapData.ipHeader.Source).append(":").append(pcapData.transportHeader.SourcePort).toString().hashCode() 
+						+ new StringBuilder().append(pcapData.ipHeader.Destination).append(":").append(pcapData.transportHeader.DestinationPort).toString().hashCode();
 				if (!tcpConnections.containsKey(key)) {
 					tcpConnectionKey = new ArrayList<Integer>(packetNumber);
 					tcpConnections.put(key, tcpConnectionKey);
@@ -72,8 +74,8 @@ public class NetworkForensicsMain {
 				}
 			}
 
+			Utils.updateOutputValues(pcapData, out, taskNumber);
 			packetNumber++;
-			// break;
 		}
 		System.out.println();
 
@@ -81,8 +83,7 @@ public class NetworkForensicsMain {
 		out.Task1.TCPConnections = tcpConnections.size();
 		out.display(taskNumber);
 
-		// System.out.println("\nTime taken = " + (new Date().getTime() - d1) +
-		// "ms");
+		System.out.println("\nTime taken = " + (new Date().getTime() - d1) + "ms");
 	}
 
 }
