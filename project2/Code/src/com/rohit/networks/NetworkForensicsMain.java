@@ -28,7 +28,6 @@ public class NetworkForensicsMain {
 
 		PCAPHeader pcapHeader;
 		PCAPData pcapData;
-		TCPConnectionTuple tcpConnectionTuple;
 		ArrayList<Integer> tcpConnectionKey;
 		Output out = new Output();
 
@@ -54,8 +53,6 @@ public class NetworkForensicsMain {
 			Utils.updateOutputValues(pcapData, out, taskNumber);
 
 			if (pcapData.ipHeader.TransportLayerProtocol == ConstantsEnum.TCP) {
-				tcpConnectionTuple = new TCPConnectionTuple();
-
 				StringBuilder src = new StringBuilder();
 				src.append(pcapData.ipHeader.Source).append(":").append(pcapData.transportHeader.SourcePort);
 				StringBuilder dest = new StringBuilder();
@@ -74,17 +71,15 @@ public class NetworkForensicsMain {
 					tcpConnections.replace(key, tcpConnectionKey);
 				}
 			}
-			
+
 			packetNumber++;
 			// break;
 		}
 		System.out.println();
 
-		if (taskNumber == 1) {
-			out.Task1.TotalPackets = packetNumber - 1;
-			out.Task1.TCPConnections = tcpConnections.size();
-		}
-		 out.display(taskNumber);
+		out.Task1.TotalPackets = packetNumber - 1;
+		out.Task1.TCPConnections = tcpConnections.size();
+		out.display(taskNumber);
 
 		// System.out.println("\nTime taken = " + (new Date().getTime() - d1) +
 		// "ms");

@@ -116,7 +116,7 @@ public class Utils {
 	// Update counts of packet types to output object
 	public static void updateOutputValues(PCAPData pcapData, Output out, int taskNumber) {
 		if(taskNumber == 1) {
-			if(pcapData.ipHeader.Version == 4) {
+			if(pcapData.linkHeader.ipVersion == 4) {
 				out.Task1.IPPackets++;
 			}
 			
