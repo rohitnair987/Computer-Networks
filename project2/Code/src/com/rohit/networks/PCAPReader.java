@@ -1,7 +1,6 @@
 package com.rohit.networks;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 public class PCAPReader {
 
@@ -38,142 +37,116 @@ public class PCAPReader {
 	public static PCAPData readPCAPData(long packetLengthFromPCAPHeader) throws IOException {
 		PCAPData pcapData = new PCAPData();
 
-		String packet = Utils.readBytesAsStringBigEndian(packetLengthFromPCAPHeader);
+		// Link - Fixed Header Length of 14 bytes
+		readLinkHeader(pcapData);
+//		System.out.println("link header:\nipversion = " + pcapData.linkHeader.ipVersion);
 
-		// Fixed Link Header Length .... (* 2 is because each byte is 2
-		// characters)
-		int linkLayeLength = 14 * 2;
-		int currentOffset = 0;
-		readLinkHeader(pcapData.linkHeader, packet.substring(currentOffset, linkLayeLength));
-		currentOffset += linkLayeLength;
-
-		// To-do: pass upper limit of string
-		readIPHeader(pcapData.ipHeader, packet.substring(currentOffset));
-		currentOffset += 2 * pcapData.ipHeader.HeaderLength;
-		// System.out.println(pcapData.ipHeader.HeaderLength + "
-		// "+pcapData.ipHeader.TotalLength);
-
-		// To-do: pass upper limit of string
-		readTransportHeader(pcapData.transportHeader, pcapData.ipHeader, packet.substring(currentOffset));
-		currentOffset += 2 * Math.max(pcapData.transportHeader.Length, pcapData.transportHeader.Offset);
-		System.out.println("toff:" + pcapData.transportHeader.Offset + " " + pcapData.transportHeader.Length);
-
-//		readData(pcapData, packet.substring(currentOffset));
-//		System.out.println("currentOffset:" + currentOffset);
+		int remainingBytes = (int) packetLengthFromPCAPHeader - 14;
+		byte[] buffer = new byte[remainingBytes];
+		System.in.read(buffer, 0, remainingBytes);
+		
+		// IP header
+//		System.out.println("\nIP header: ");
+		readIPHeader(pcapData, buffer, 0);
+//		Temp.display(pcapData.ipHeader);
+		
+		// TCP Header
+//		System.out.println("\nTransport header: ");
+		readTransportHeader(pcapData, buffer, pcapData.ipHeader.HeaderLength);
+//		Temp.display(pcapData.transportHeader, pcapData.ipHeader.TransportLayerProtocol);
+		
+		// Data
+		int dataStartInd = pcapData.ipHeader.HeaderLength + pcapData.transportHeader.Offset + pcapData.transportHeader.Length;
+		readData(pcapData, buffer, dataStartInd);
+		
 
 		return pcapData;
 	}
 
-	private static void readLinkHeader(LinkHeader linkHeader, String packetLinkHeader) throws IOException {
+	// Read Link header and update pcapData
+	private static void readLinkHeader(PCAPData pcapData) throws IOException {
 		// Destination and source - skip first 12 bytes
+		Utils.skipBytes(12);
 
-		if (packetLinkHeader.substring(12 * 2).equals("0800")) {
-			linkHeader.ipVersion = 4;
+		// ip version
+		byte[] buffer = new byte[2];
+		System.in.read(buffer, 0, 2);
+		if (buffer[0] == 8 && buffer[1] == 0) {
+			pcapData.linkHeader.ipVersion = 4;
 		} else {
-			linkHeader.ipVersion = 6;
+			pcapData.linkHeader.ipVersion = 6;
 		}
 	}
 
-	private static void readIPHeader(IPHeader ipHeader, String packetIPHeader) {
-		int CurrentOffset = 0;
+	// Read IP header and update pcapData
+	private static void readIPHeader(PCAPData pcapData, byte[] buffer, int startInd) {
+		pcapData.ipHeader.Version = Utils.getHigherNibble(buffer[0]);
 
-		ipHeader.Version = Utils.hexToDecimal(packetIPHeader.charAt(CurrentOffset++));
+		pcapData.ipHeader.HeaderLength = 4 * Utils.getLowerNibble(buffer[0]);
 
-		ipHeader.HeaderLength = 4 * Utils.hexToDecimal(packetIPHeader.charAt(CurrentOffset++));
+		// TypeOfService - skip index 1 (1 byte)
 
-		// TypeOfService skip indices 2 and 3 (1 byte)
-		CurrentOffset += 2;
+		pcapData.ipHeader.TotalLength = Utils.bytesToInt2(buffer, 2);
 
-		ipHeader.TotalLength = (int) Utils.hexToDecimal(packetIPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-		CurrentOffset += 2 * 2;
+		pcapData.ipHeader.Identification = Utils.bytesToInt2(buffer, 4);
 
-		ipHeader.Identification = (int) Utils
-				.hexToDecimal(packetIPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-		CurrentOffset += 2 * 2;
+		// flags and fragment offset - skip 2 bytes
 
-		// flags and fragment offset
-		CurrentOffset += 2 * 2;
+		pcapData.ipHeader.TTL = buffer[8];
 
-		ipHeader.TTL = (int) Utils.hexToDecimal(packetIPHeader.substring(CurrentOffset, CurrentOffset + 2));
-		CurrentOffset += 2;
+		pcapData.ipHeader.TransportLayerProtocol = ConstantsEnum.setValue(buffer[9]);
 
-		ipHeader.TransportLayerProtocol = ConstantsEnum
-				.setValue((int) Utils.hexToDecimal(packetIPHeader.substring(CurrentOffset, CurrentOffset + 2)));
-		CurrentOffset += 2;
+		pcapData.ipHeader.HeaderChecksum = Utils.bytesToInt2(buffer, 10);
 
-		ipHeader.HeaderChecksum = (int) Utils
-				.hexToDecimal(packetIPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-		CurrentOffset += 2 * 2;
+		pcapData.ipHeader.Source = Utils.getIP(buffer, 12);
 
-		ipHeader.Source = Utils.stringToIP(packetIPHeader.substring(CurrentOffset, CurrentOffset + 2 * 4));
-		CurrentOffset += 2 * 4;
-
-		ipHeader.Destination = Utils.stringToIP(packetIPHeader.substring(CurrentOffset, CurrentOffset + 2 * 4));
+		pcapData.ipHeader.Destination = Utils.getIP(buffer, 16);
 
 	}
-
-	private static void readTransportHeader(TransportHeader transportHeader, IPHeader ipHeader,
-			String packetTCPHeader) {
-		int CurrentOffset = 0;
-
-		switch (ipHeader.TransportLayerProtocol) {
+	
+	// Read Transport header and update pcapData
+	private static void readTransportHeader(PCAPData pcapData, byte[] buffer, int startInd) {
+		switch (pcapData.ipHeader.TransportLayerProtocol) {
 
 		case UDP:
-			transportHeader.SourcePort = (int) Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-			CurrentOffset += 2 * 2;
-			transportHeader.DestinationPort = (int) Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-			CurrentOffset += 2 * 2;
-			transportHeader.Length = (int) Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-			CurrentOffset += 2 * 2;
-			transportHeader.CheckSum = packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2);
-
+			pcapData.transportHeader.SourcePort = Utils.bytesToInt2(buffer, startInd);
+			
+			pcapData.transportHeader.DestinationPort = Utils.bytesToInt2(buffer, startInd+2);
+			
+			pcapData.transportHeader.Length = Utils.bytesToInt2(buffer, startInd+4);
+			
+			pcapData.transportHeader.CheckSum = Utils.bytesToInt2(buffer, startInd+6);
+			
 			// UDP Data - we're not using this right now
-			// Utils.skipBytes(transportHeader.Length - 8);
 
 			break;
 
 		case TCP:
-			transportHeader.SourcePort = (int) Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-			CurrentOffset += 2 * 2;
-
-			transportHeader.DestinationPort = (int) Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-			CurrentOffset += 2 * 2;
-
-			transportHeader.SeqNum = Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 4));
-			CurrentOffset += 2 * 4;
-
-			transportHeader.AckNum = Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 4));
-			CurrentOffset += 2 * 4;
-
+			pcapData.transportHeader.SourcePort = Utils.bytesToInt2(buffer, startInd);
+			
+			pcapData.transportHeader.DestinationPort = Utils.bytesToInt2(buffer, startInd+2);
+			
+			pcapData.transportHeader.SeqNum = Utils.bytesToInt4(buffer, startInd + 4);
+			
+			pcapData.transportHeader.AckNum = Utils.bytesToInt4(buffer, startInd + 8);
+			
 			// for offset, take only top 4 bits n ignore next 4
-			transportHeader.Offset = 4
-					* (int) Utils.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 1));
-			CurrentOffset += 2;
+			pcapData.transportHeader.Offset = 4 * Utils.getHigherNibble(buffer[startInd + 12]);
+			
+			// Whenever I wanna use
+//			pcapData.transportHeader.TCPFlags = Utils.bytesToBinaryString(buffer, startInd + 13, 1);
+			
+			// Whenever I wanna use
+//			pcapData.transportHeader.Window = Utils.bytesToInt2(buffer, startInd+14);
+			
+			// Whenever I wanna use
+//			pcapData.transportHeader.CheckSum = Utils.bytesToInt2(buffer, startInd+16);
+			
+			// Whenever I wanna use
+//			pcapData.transportHeader.UrgentPointer = Utils.bytesToInt2(buffer, startInd+18);
 
-			transportHeader.TCPFlags = packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2);
-			CurrentOffset += 2;
-
-			transportHeader.Window = (int) Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-			CurrentOffset += 2 * 2;
-
-			transportHeader.CheckSum = packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2);
-			CurrentOffset += 2 * 2;
-
-			transportHeader.UrgentPointer = (int) Utils
-					.hexToDecimal(packetTCPHeader.substring(CurrentOffset, CurrentOffset + 2 * 2));
-			CurrentOffset += 2 * 2;
-
-			// Skip Options for now
-			transportHeader.Options = packetTCPHeader.substring(CurrentOffset,
-					CurrentOffset + transportHeader.Offset - 20);
+			// Whenever I wanna use
+//			pcapData.transportHeader.Options = Utils.ByteArrayToString(buffer,startInd+ 20, pcapData.transportHeader.Offset - 20);
 
 			break;
 
@@ -182,33 +155,19 @@ public class PCAPReader {
 			break;
 
 		default:
-			System.out.println("The Transport Layer Protocol " + ipHeader.TransportLayerProtocol + " is not supported");
+			// Not working with these as of now
 
 		}
+		
 	}
 
-	private static void readData(PCAPData pcapData, String packetData) {
-		System.out.println(packetData);
-		if (pcapData.ipHeader.TransportLayerProtocol == ConstantsEnum.TCP && packetData.length() > 0) {
-			System.out.println("str:" + decode(packetData).toString());
+	// Read Packet data
+	private static void readData(PCAPData pcapData, byte[] buffer, int startInd) {
+		if(startInd != buffer.length) {
+//			Temp.display("Data", buffer, startInd, buffer.length-1);
+			
 		}
-	}
-
-	public static String decode(String hex) {
-
-		String[] list = hex.split("(?<=\\G.{2})");
-		ByteBuffer buffer = ByteBuffer.allocate(list.length);
-		System.out.println(list.length);
-		StringBuffer sb = new StringBuffer();
-		for (String str : list) {
-			// System.out.println("list:"+str);
-			int decimal = Integer.parseInt(str, 16);
-			sb.append((char) decimal);
-			// buffer.put(Byte.parseByte(str, 16));
-		}
-		// System.out.println("sb:"+sb);
-		return sb.toString();
 
 	}
-	// 980 979 644 72
+
 }

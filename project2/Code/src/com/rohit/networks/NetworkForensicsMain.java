@@ -40,8 +40,8 @@ public class NetworkForensicsMain {
 		int packetNumber = 1;
 
 		while (System.in.available() > 0) {
-			// while (packetNumber < 20) {
-			System.out.println("\n" + packetNumber + ": ");
+//			 while (packetNumber < 11) {
+//			System.out.println("\n" + packetNumber + ": ");
 
 			// Read PCAP Header of each packet
 			pcapHeader = PCAPReader.readPCAPHeader();
@@ -76,6 +76,7 @@ public class NetworkForensicsMain {
 
 			Utils.updateOutputValues(pcapData, out, taskNumber);
 			packetNumber++;
+//			break;
 		}
 		System.out.println();
 

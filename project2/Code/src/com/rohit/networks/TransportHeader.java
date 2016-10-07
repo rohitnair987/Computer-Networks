@@ -3,7 +3,7 @@ package com.rohit.networks;
 public class TransportHeader {
 	/* Common fields */
 	// 2 bytes
-	String CheckSum;
+	int CheckSum;
 
 	/* TCP - Total 8 bytes */
 	// 2 bytes
@@ -33,7 +33,7 @@ public class TransportHeader {
 	// 2 bytes
 	// int SourcePort; - declared under TCP
 	// 2 bytes
-	// int DestinationPort; - declared under TCP
+	// int ; - declared under TCP
 	// 2 bytes
 	int Length;
 	// 2 bytes

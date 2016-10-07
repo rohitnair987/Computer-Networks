@@ -67,6 +67,14 @@ public class Utils {
 		return length.toString();
 	}
 
+	// Read i bytes from input stream in Big-Endian style and return as byte
+	// array
+	public static byte[] readInputAsByteArray(int i) throws IOException {
+		byte[] buffer = new byte[i];
+		System.in.read(buffer, 0, i);
+		return buffer;
+	}
+
 	// Displays the next i bytes from the input stream
 	public static void displayNextIBytes(int i) throws IOException {
 		int counter = 0;
@@ -115,16 +123,16 @@ public class Utils {
 
 	// Update counts of packet types to output object
 	public static void updateOutputValues(PCAPData pcapData, Output out, int taskNumber) {
-		if(taskNumber == 1) {
-			if(pcapData.linkHeader.ipVersion == 4) {
+		if (taskNumber == 1) {
+			if (pcapData.linkHeader.ipVersion == 4) {
 				out.Task1.IPPackets++;
 			}
-			
+
 			switch (pcapData.ipHeader.TransportLayerProtocol) {
 			case UDP:
 				out.Task1.UDPPackets++;
 				break;
-	
+
 			case TCP:
 				out.Task1.TCPPackets++;
 				break;
@@ -132,6 +140,57 @@ public class Utils {
 				break;
 			}
 		}
+	}
+
+	public static String getIP(byte[] buffer, int startInd) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = startInd; i < startInd + 3; i++) {
+			sb.append(buffer[i] & 0xff);
+			sb.append(".");
+		}
+		sb.append(buffer[startInd + 3] & 0xff);
+		return sb.toString();
+	}
+
+	public static int bytesToInt2(byte[] buffer, int startInd) {
+		// return ((bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF)) & 0xffffffffL;
+		return ((buffer[startInd] & 0xff) << 8) | (buffer[startInd + 1] & 0xff);
+	}
+
+	public static long bytesToInt4(byte[] buffer, int startInd) {
+		return ((buffer[startInd] << 24) | (buffer[startInd + 1] & 0xFF) << 16 | (buffer[startInd + 2] & 0xFF) << 8
+				| (buffer[startInd + 3] & 0xFF)) & 0xffffffffL;
+	}
+
+	public static int getHigherNibble(byte b) {
+		return (b & 0xff) >>> 4;
+	}
+
+	public static int getLowerNibble(byte b) {
+		return b & 0x0f;
+	}
+
+	public static String bytesToBinaryString(byte[] buffer, int startInd, int bytes) {
+		StringBuffer sb = new StringBuffer();
+		int i = 0;
+		while (i < bytes) {
+			sb.append(String.format("%8s", Integer.toBinaryString(buffer[startInd + i] & 0xFF)).replace(' ', '0'));
+			i++;
+		}
+		return sb.toString();
+	}
+
+	public static String ByteArrayToString(byte[] buffer, int startInd, int numberOfBytes) {
+		if(numberOfBytes == 0) {
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		int i = 0;
+		while(i<numberOfBytes){
+			sb.append(String.format("%02x ", buffer[startInd+i]));
+			i++;
+		}
+		return sb.toString();
 	}
 
 }
