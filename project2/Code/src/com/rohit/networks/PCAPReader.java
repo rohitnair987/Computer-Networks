@@ -1,6 +1,7 @@
 package com.rohit.networks;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class PCAPReader {
 
@@ -29,37 +30,46 @@ public class PCAPReader {
 
 		Utils.skipBytes(8);
 		pcapHeader.NumberOfOctetsOfPacket = Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4));
+		// remove these comments, useless
+		// String s = Utils.readBytesAsStringLittleEndian(4);
+		// System.out.println(s);
 		pcapHeader.ActualLengthOfPacket = Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4));
+		// pcapHeader.ActualLengthOfPacket = Utils.hexToDecimal(s);
 
 		return pcapHeader;
 	}
 
-	public static PCAPData readPCAPData(long packetLengthFromPCAPHeader) throws IOException {
+	public static PCAPData readPCAPData(long packetLengthFromPCAPHeader, int taskNumber) throws IOException {
 		PCAPData pcapData = new PCAPData();
 
 		// Link - Fixed Header Length of 14 bytes
 		readLinkHeader(pcapData);
-//		System.out.println("link header:\nipversion = " + pcapData.linkHeader.ipVersion);
 
 		int remainingBytes = (int) packetLengthFromPCAPHeader - 14;
 		byte[] buffer = new byte[remainingBytes];
-		System.in.read(buffer, 0, remainingBytes);
-		
-		// IP header
-//		System.out.println("\nIP header: ");
-		readIPHeader(pcapData, buffer, 0);
-//		Temp.display(pcapData.ipHeader);
-		
-		// TCP Header
-//		System.out.println("\nTransport header: ");
-		readTransportHeader(pcapData, buffer, pcapData.ipHeader.HeaderLength);
-//		Temp.display(pcapData.transportHeader, pcapData.ipHeader.TransportLayerProtocol);
-		
-		// Data
-		int dataStartInd = pcapData.ipHeader.HeaderLength + pcapData.transportHeader.Offset + pcapData.transportHeader.Length;
-		readData(pcapData, buffer, dataStartInd);
-		
+		// System.in.read(buffer, 0, remainingBytes);
+		// Foolproof solution
+		for (int i = 0; i < remainingBytes; i++) {
+			buffer[i] = (byte) System.in.read();
+		}
 
+		// IP header
+		// System.out.println("\nIP header: ");
+		readIPHeader(pcapData, buffer);
+		// Temp.display(pcapData.ipHeader);
+
+		// TCP Header
+		// System.out.println("\nTransport header: ");
+		readTransportHeader(pcapData, buffer, pcapData.ipHeader.HeaderLength);
+		// Temp.display(pcapData.transportHeader,
+		// pcapData.ipHeader.TransportLayerProtocol);
+
+		// Data
+		if (taskNumber != 1) {
+			int dataStartInd = pcapData.ipHeader.HeaderLength + pcapData.transportHeader.Offset
+					+ pcapData.transportHeader.Length;
+			readData(pcapData, buffer, dataStartInd, packetLengthFromPCAPHeader);
+		}
 		return pcapData;
 	}
 
@@ -79,7 +89,7 @@ public class PCAPReader {
 	}
 
 	// Read IP header and update pcapData
-	private static void readIPHeader(PCAPData pcapData, byte[] buffer, int startInd) {
+	private static void readIPHeader(PCAPData pcapData, byte[] buffer) {
 		pcapData.ipHeader.Version = Utils.getHigherNibble(buffer[0]);
 
 		pcapData.ipHeader.HeaderLength = 4 * Utils.getLowerNibble(buffer[0]);
@@ -103,50 +113,56 @@ public class PCAPReader {
 		pcapData.ipHeader.Destination = Utils.getIP(buffer, 16);
 
 	}
-	
+
 	// Read Transport header and update pcapData
 	private static void readTransportHeader(PCAPData pcapData, byte[] buffer, int startInd) {
 		switch (pcapData.ipHeader.TransportLayerProtocol) {
 
 		case UDP:
 			pcapData.transportHeader.SourcePort = Utils.bytesToInt2(buffer, startInd);
-			
-			pcapData.transportHeader.DestinationPort = Utils.bytesToInt2(buffer, startInd+2);
-			
-			pcapData.transportHeader.Length = Utils.bytesToInt2(buffer, startInd+4);
-			
-			pcapData.transportHeader.CheckSum = Utils.bytesToInt2(buffer, startInd+6);
-			
+
+			pcapData.transportHeader.DestinationPort = Utils.bytesToInt2(buffer, startInd + 2);
+
+			pcapData.transportHeader.Length = Utils.bytesToInt2(buffer, startInd + 4);
+
+			pcapData.transportHeader.CheckSum = Utils.bytesToInt2(buffer, startInd + 6);
+
 			// UDP Data - we're not using this right now
 
 			break;
 
 		case TCP:
 			pcapData.transportHeader.SourcePort = Utils.bytesToInt2(buffer, startInd);
-			
-			pcapData.transportHeader.DestinationPort = Utils.bytesToInt2(buffer, startInd+2);
-			
+
+			pcapData.transportHeader.DestinationPort = Utils.bytesToInt2(buffer, startInd + 2);
+
 			pcapData.transportHeader.SeqNum = Utils.bytesToInt4(buffer, startInd + 4);
-			
+
 			pcapData.transportHeader.AckNum = Utils.bytesToInt4(buffer, startInd + 8);
-			
+
 			// for offset, take only top 4 bits n ignore next 4
 			pcapData.transportHeader.Offset = 4 * Utils.getHigherNibble(buffer[startInd + 12]);
-			
-			// Whenever I wanna use
-//			pcapData.transportHeader.TCPFlags = Utils.bytesToBinaryString(buffer, startInd + 13, 1);
-			
-			// Whenever I wanna use
-//			pcapData.transportHeader.Window = Utils.bytesToInt2(buffer, startInd+14);
-			
-			// Whenever I wanna use
-//			pcapData.transportHeader.CheckSum = Utils.bytesToInt2(buffer, startInd+16);
-			
-			// Whenever I wanna use
-//			pcapData.transportHeader.UrgentPointer = Utils.bytesToInt2(buffer, startInd+18);
 
 			// Whenever I wanna use
-//			pcapData.transportHeader.Options = Utils.ByteArrayToString(buffer,startInd+ 20, pcapData.transportHeader.Offset - 20);
+			// pcapData.transportHeader.TCPFlags =
+			// Utils.bytesToBinaryString(buffer, startInd + 13, 1);
+
+			// Whenever I wanna use
+			// pcapData.transportHeader.Window = Utils.bytesToInt2(buffer,
+			// startInd+14);
+
+			// Whenever I wanna use
+			// pcapData.transportHeader.CheckSum = Utils.bytesToInt2(buffer,
+			// startInd+16);
+
+			// Whenever I wanna use
+			// pcapData.transportHeader.UrgentPointer =
+			// Utils.bytesToInt2(buffer, startInd+18);
+
+			// Whenever I wanna use
+			// pcapData.transportHeader.Options =
+			// Utils.ByteArrayToString(buffer,startInd+ 20,
+			// pcapData.transportHeader.Offset - 20);
 
 			break;
 
@@ -158,16 +174,25 @@ public class PCAPReader {
 			// Not working with these as of now
 
 		}
-		
+
 	}
 
 	// Read Packet data
-	private static void readData(PCAPData pcapData, byte[] buffer, int startInd) {
-		if(startInd != buffer.length) {
-//			Temp.display("Data", buffer, startInd, buffer.length-1);
-			
+	private static void readData(PCAPData pcapData, byte[] buffer, int startInd, long packetLengthFromPCAPHeader) {
+		if (pcapData.ipHeader.TransportLayerProtocol == ConstantsEnum.TCP) {
+			if (startInd != buffer.length) {
+				int diff = (int) packetLengthFromPCAPHeader - (14 + pcapData.ipHeader.TotalLength);
+				if (diff == 0) {
+					pcapData.Data = buffer;
+				} else {
+					pcapData.Data = Arrays.copyOfRange(buffer, 0, buffer.length - diff);
+				}
+				pcapData.startInd = startInd;
+			} else {
+				pcapData.Data = new byte[0];
+				pcapData.startInd = 0;
+			}
 		}
-
 	}
 
 }

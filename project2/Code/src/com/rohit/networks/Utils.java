@@ -153,7 +153,6 @@ public class Utils {
 	}
 
 	public static int bytesToInt2(byte[] buffer, int startInd) {
-		// return ((bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF)) & 0xffffffffL;
 		return ((buffer[startInd] & 0xff) << 8) | (buffer[startInd + 1] & 0xff);
 	}
 
@@ -181,13 +180,13 @@ public class Utils {
 	}
 
 	public static String ByteArrayToString(byte[] buffer, int startInd, int numberOfBytes) {
-		if(numberOfBytes == 0) {
+		if (numberOfBytes == 0) {
 			return "";
 		}
 		StringBuffer sb = new StringBuffer();
 		int i = 0;
-		while(i<numberOfBytes){
-			sb.append(String.format("%02x ", buffer[startInd+i]));
+		while (i < numberOfBytes) {
+			sb.append(String.format("%02x ", (buffer[startInd + i]) & 0xff));
 			i++;
 		}
 		return sb.toString();

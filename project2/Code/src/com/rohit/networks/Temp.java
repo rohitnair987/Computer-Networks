@@ -1,11 +1,13 @@
 package com.rohit.networks;
 
+import java.util.HashMap;
+
 public class Temp {
 
 	public static void display(String s, byte[] packetInBytes, int startInd, int endInd) {
 		System.out.print(s + ": ");
 		for (int i = startInd; i <= endInd; i++) {
-			System.out.print(packetInBytes[i] + " ");
+			System.out.printf(String.format("%02x ", packetInBytes[i]));
 		}
 		System.out.println();
 	}
