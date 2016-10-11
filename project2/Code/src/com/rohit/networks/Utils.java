@@ -1,6 +1,7 @@
 package com.rohit.networks;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Utils {
 
@@ -190,6 +191,22 @@ public class Utils {
 			i++;
 		}
 		return sb.toString();
+	}
+
+	public static int getNoOfBytes(TCPConnectionTupleAndBytes tuple, char type) {
+		ArrayList<byte[]> stream;
+		if (type == 'u') {
+			stream = tuple.upstreamBytes;
+		} else {
+			stream = tuple.downstreamBytes;
+		}
+
+		int length = 0;
+		for (byte[] b : stream) {
+			length += b.length;
+		}
+
+		return length;
 	}
 
 }

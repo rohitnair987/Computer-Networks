@@ -30,11 +30,7 @@ public class PCAPReader {
 
 		Utils.skipBytes(8);
 		pcapHeader.NumberOfOctetsOfPacket = Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4));
-		// remove these comments, useless
-		// String s = Utils.readBytesAsStringLittleEndian(4);
-		// System.out.println(s);
 		pcapHeader.ActualLengthOfPacket = Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4));
-		// pcapHeader.ActualLengthOfPacket = Utils.hexToDecimal(s);
 
 		return pcapHeader;
 	}
@@ -47,19 +43,15 @@ public class PCAPReader {
 
 		int remainingBytes = (int) packetLengthFromPCAPHeader - 14;
 		byte[] buffer = new byte[remainingBytes];
-		// System.in.read(buffer, 0, remainingBytes);
-		// Foolproof solution
 		for (int i = 0; i < remainingBytes; i++) {
 			buffer[i] = (byte) System.in.read();
 		}
 
 		// IP header
-		// System.out.println("\nIP header: ");
 		readIPHeader(pcapData, buffer);
 		// Temp.display(pcapData.ipHeader);
 
 		// TCP Header
-		// System.out.println("\nTransport header: ");
 		readTransportHeader(pcapData, buffer, pcapData.ipHeader.HeaderLength);
 		// Temp.display(pcapData.transportHeader,
 		// pcapData.ipHeader.TransportLayerProtocol);
@@ -78,7 +70,7 @@ public class PCAPReader {
 		// Destination and source - skip first 12 bytes
 		Utils.skipBytes(12);
 
-		// ip version
+		// IP version
 		byte[] buffer = new byte[2];
 		System.in.read(buffer, 0, 2);
 		if (buffer[0] == 8 && buffer[1] == 0) {

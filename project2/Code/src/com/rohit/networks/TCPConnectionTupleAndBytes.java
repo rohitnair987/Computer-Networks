@@ -1,9 +1,11 @@
 package com.rohit.networks;
 
+import java.util.ArrayList;
+
 public class TCPConnectionTupleAndBytes {
 	TCPConnectionTuple tcpConnectionTuple = new TCPConnectionTuple();
-	int upstreamBytes = 0;
-	int downstreamBytes = 0;
+	ArrayList<byte[]> upstreamBytes = new ArrayList<byte[]>();
+	ArrayList<byte[]> downstreamBytes = new ArrayList<byte[]>();
 
 	public void display() {
 		System.out.println(

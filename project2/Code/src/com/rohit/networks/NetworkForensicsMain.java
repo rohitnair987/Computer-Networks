@@ -26,7 +26,7 @@ public class NetworkForensicsMain {
 
 		PCAPHeader pcapHeader = null;
 		PCAPData pcapData = null;
-		HashMap<Long, Integer> tcpConnectionPackets = new HashMap<Long, Integer>();
+		TreeMap<Long, Integer> tcpConnectionPackets = new TreeMap<Long, Integer>();
 		Output out = new Output();
 
 		Map<Integer, PCAPData> allPCAPDataPackets = new HashMap<Integer, PCAPData>();
@@ -34,7 +34,7 @@ public class NetworkForensicsMain {
 		/*
 		 * src.hashcode + dest.hashcode seqNo, packetNo
 		 */
-		HashMap<Integer, HashMap<Long, Integer>> tcpConnections = new HashMap<Integer, HashMap<Long, Integer>>();
+		HashMap<Integer, TreeMap<Long, Integer>> tcpConnections = new HashMap<Integer, TreeMap<Long, Integer>>();
 
 		int packetNumber = 1;
 
@@ -46,7 +46,7 @@ public class NetworkForensicsMain {
 			pcapHeader = PCAPReader.readPCAPHeader();
 			if (pcapHeader.NumberOfOctetsOfPacket != pcapHeader.ActualLengthOfPacket) {
 				System.out.println("\nNot a valid packet!");
-				System.exit(0);
+				// System.exit(1);
 			}
 
 			// Read the packet
@@ -56,40 +56,35 @@ public class NetworkForensicsMain {
 			allPCAPDataPackets.put(packetNumber, pcapData);
 
 			if (pcapData.ipHeader.TransportLayerProtocol == ConstantsEnum.TCP) {
-				int key = new StringBuilder().append(pcapData.ipHeader.Source).append(":")
+				int key = new StringBuilder().append(pcapData.ipHeader.Source)
 						.append(pcapData.transportHeader.SourcePort).toString().hashCode()
-						+ new StringBuilder().append(pcapData.ipHeader.Destination).append(":")
+						+ new StringBuilder().append(pcapData.ipHeader.Destination)
 								.append(pcapData.transportHeader.DestinationPort).toString().hashCode();
 
 				if (!tcpConnections.containsKey(key)) {
-					tcpConnectionPackets = new HashMap<Long, Integer>();
+					tcpConnectionPackets = new TreeMap<Long, Integer>();
 					tcpConnectionPackets.put(pcapData.transportHeader.SeqNum, packetNumber);
-					// System.out.println("new:"+tcpConnectionPackets);
 					tcpConnections.put(key, tcpConnectionPackets);
 				} else {
 					tcpConnectionPackets = tcpConnections.get(key);
-					// if
-					// (!tcpConnectionPackets.containsKey(pcapData.transportHeader.SeqNum))
-					// {
 					tcpConnectionPackets.put(pcapData.transportHeader.SeqNum, packetNumber);
 					tcpConnections.replace(key, tcpConnectionPackets);
-					// }
 				}
 			}
 
 			Utils.updateOutputValues(pcapData, out, taskNumber);
 
-			if (packetNumber == 557 || packetNumber == 559 || packetNumber == 489 || packetNumber == 540) {
-				System.out.println(packetNumber + " len:" + pcapHeader.ActualLengthOfPacket + " " + (14+pcapData.ipHeader.TotalLength));
-			}
-
 			packetNumber++;
 			// break;
 		}
-		System.out.println(tcpConnections.size());
+		// System.out.println(tcpConnections.size());
 
 		out.Task1.TotalPackets = packetNumber - 1;
 		out.Task1.TCPConnections = tcpConnections.size();
+
+		// if(taskNumber != 1) {
+		// Utils.sort(tcpConnections);
+		// }
 
 		out.display(taskNumber, allPCAPDataPackets, tcpConnections);
 

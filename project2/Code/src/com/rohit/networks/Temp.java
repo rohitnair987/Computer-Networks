@@ -13,6 +13,7 @@ public class Temp {
 	}
 
 	public static void display(IPHeader ipHeader) {
+		System.out.println("\nIP header: ");
 		System.out.println("ver: " + ipHeader.Version);
 		System.out.println("hlen: " + ipHeader.HeaderLength);
 		// System.out.println("TypeOfService: " + ipHeader);
@@ -27,6 +28,7 @@ public class Temp {
 	}
 
 	public static void display(TransportHeader transportHeader, ConstantsEnum transportLayerProtocol) {
+		System.out.println("\nTransport header: ");
 		switch (transportLayerProtocol) {
 		case UDP:
 			System.out.println("SourcePort: " + transportHeader.SourcePort);
