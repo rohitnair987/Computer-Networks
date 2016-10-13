@@ -28,7 +28,7 @@ public class PCAPReader {
 	public static PCAPHeader readPCAPHeader() throws IOException {
 		PCAPHeader pcapHeader = new PCAPHeader();
 
-		Utils.skipBytes(8);
+		pcapHeader.PacketTimeStamp = (long) (Math.pow(10, 6) * Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4)) + Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4)));
 		pcapHeader.NumberOfOctetsOfPacket = Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4));
 		pcapHeader.ActualLengthOfPacket = Utils.hexToDecimal(Utils.readBytesAsStringLittleEndian(4));
 

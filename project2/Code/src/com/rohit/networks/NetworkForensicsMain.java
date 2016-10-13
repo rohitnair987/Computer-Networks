@@ -1,7 +1,10 @@
 package com.rohit.networks;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class NetworkForensicsMain {
 
@@ -14,7 +17,7 @@ public class NetworkForensicsMain {
 		// System.exit(1);
 		// }
 
-		int taskNumber = 2;
+		int taskNumber = 3;
 
 		// Skip global header
 		Utils.skipBytes(24);
@@ -44,6 +47,9 @@ public class NetworkForensicsMain {
 
 			// Read PCAP Header of each packet
 			pcapHeader = PCAPReader.readPCAPHeader();
+//			if(packetNumber>0) {
+//				continue;
+//			}
 			if (pcapHeader.NumberOfOctetsOfPacket != pcapHeader.ActualLengthOfPacket) {
 				System.out.println("\nNot a valid packet!");
 				// System.exit(1);
@@ -51,6 +57,7 @@ public class NetworkForensicsMain {
 
 			// Read the packet
 			pcapData = PCAPReader.readPCAPData(pcapHeader.ActualLengthOfPacket, taskNumber);
+			pcapData.PacketTimeStamp = pcapHeader.PacketTimeStamp;
 
 			// Store the packet
 			allPCAPDataPackets.put(packetNumber, pcapData);
@@ -88,8 +95,8 @@ public class NetworkForensicsMain {
 
 		out.display(taskNumber, allPCAPDataPackets, tcpConnections);
 
-		// System.out.println("\nTime taken = " + (new Date().getTime() - d1) +
-		// "ms");
+//		 System.out.println("\nTime taken = " + (new Date().getTime() - d1) +
+//		 "ms");
 	}
 
 }

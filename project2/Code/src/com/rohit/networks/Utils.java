@@ -2,6 +2,8 @@ package com.rohit.networks;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 public class Utils {
 
@@ -207,6 +209,29 @@ public class Utils {
 		}
 
 		return length;
+	}
+
+	public static int stringToNumber(String str) {
+		try {
+			return Integer.parseInt(str);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+
+	public static TreeMap<Long, TCPConnectionTupleAndBytes> sortByTimeStamp(
+			HashMap<Integer, TCPConnectionTupleAndBytes> upLink) {
+		
+		TreeMap<Long, TCPConnectionTupleAndBytes> upLinksSortedByTimeStamp = new TreeMap<Long, TCPConnectionTupleAndBytes>();
+		for(TCPConnectionTupleAndBytes t : upLink.values()) {
+			upLinksSortedByTimeStamp.put(t.PacketTimeStamp, t);
+		}
+		
+//		for (Long iterable_element : upLinksSortedByTimeStamp.keySet()) {
+//			System.out.println(iterable_element);
+//		}
+		
+		return upLinksSortedByTimeStamp;
 	}
 
 }

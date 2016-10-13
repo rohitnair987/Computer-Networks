@@ -1,7 +1,7 @@
 package com.rohit.networks;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,14 +22,13 @@ public class Output {
 	void display(int taskNumber, Map<Integer, PCAPData> allPCAPDataPackets,
 			HashMap<Integer, TreeMap<Long, Integer>> tcpConnections) throws IOException {
 
-		switch (taskNumber) {
-		case 1:
+		if (taskNumber == 1) {
 			String outString = Task1.TotalPackets + " " + Task1.IPPackets + " " + Task1.TCPPackets + " "
 					+ Task1.TCPConnections;
 			System.out.println(outString);
-			break;
+		}
 
-		case 2:
+		if (taskNumber == 2 || taskNumber == 3) {
 			HashMap<Integer, TCPConnectionTupleAndBytes> downLink = new HashMap<Integer, TCPConnectionTupleAndBytes>();
 			HashMap<Integer, TCPConnectionTupleAndBytes> upLink = new HashMap<Integer, TCPConnectionTupleAndBytes>();
 
@@ -50,6 +49,7 @@ public class Output {
 
 						if (!downLink.containsKey(key)) {
 							downTupleWithBytes.tcpConnectionTuple = down;
+							downTupleWithBytes.PacketNumber.add(packetNo);
 							if (pcapData.Data != null) {
 								downTupleWithBytes.downstreamBytes.add(
 										Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
@@ -57,6 +57,7 @@ public class Output {
 							downLink.put(key, downTupleWithBytes);
 						} else {
 							downTupleWithBytes = downLink.get(key);
+							downTupleWithBytes.PacketNumber.add(packetNo);
 							downTupleWithBytes.tcpConnectionTuple = down;
 							if (pcapData.Data != null) {
 								downTupleWithBytes.downstreamBytes.add(
@@ -76,9 +77,11 @@ public class Output {
 
 						int key = up.calculateHashCode();
 						TCPConnectionTupleAndBytes upTupleWithBytes = new TCPConnectionTupleAndBytes();
+						upTupleWithBytes.PacketTimeStamp = pcapData.PacketTimeStamp;
 
 						if (!upLink.containsKey(key)) {
 							upTupleWithBytes.tcpConnectionTuple = up;
+							upTupleWithBytes.PacketNumber.add(packetNo);
 							if (pcapData.Data != null) {
 								upTupleWithBytes.upstreamBytes.add(
 										Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
@@ -86,6 +89,7 @@ public class Output {
 							upLink.put(key, upTupleWithBytes);
 						} else {
 							upTupleWithBytes = upLink.get(key);
+							upTupleWithBytes.PacketNumber.add(packetNo);
 							upTupleWithBytes.tcpConnectionTuple = up;
 							if (pcapData.Data != null) {
 								upTupleWithBytes.upstreamBytes.add(
@@ -121,29 +125,190 @@ public class Output {
 				task2Out.put(sb.toString(), data);
 			}
 
-			FileOutputStream fos = new FileOutputStream(
-					"/Users/rohit/Drive_Sync/Sem3/CN/Networks/project2/mytask2.out");
-
-			// Write Tuple and number of upstream and downstream bytes
-			for (String tupleUpDown : task2Out.keySet()) {
-				fos.write((tupleUpDown + "\n").getBytes("ISO-8859-1"));
+			if (taskNumber == 2) {
+				write(task2Out);
 			}
 
-			// Write Data
-			StringBuffer dataPrint = new StringBuffer();
-			for (ArrayList<byte[]> dataArray : task2Out.values()) {
-				for (byte[] data : dataArray) {
-					fos.write(data);
-					for (int i = 0; i < data.length; i++) {
-						dataPrint.append(data[i]);
+			if (taskNumber == 3) {
+				int len = 0;
+
+				// for(TCPConnectionTupleAndBytes o : downLink.values()) {
+				// System.out.println(o.toString());
+				// }
+				// System.exit(0);
+
+				// Sort up-links by time-stamp
+				TreeMap<Long, TCPConnectionTupleAndBytes> upLinksSortedByTimeStamp = Utils.sortByTimeStamp(upLink);
+				// free the memory of this objectsince it's not gonna be used
+				upLink = null;
+
+				// for (long l : upLinksSortedByTimeStamp.keySet()) {
+				// System.out.println(l);
+				// }
+				// System.exit(0);
+				Map<Long, String> task3 = new TreeMap<>();
+				int reqNo = 1;
+				boolean dis = false;
+				for (TCPConnectionTupleAndBytes reqConn : upLinksSortedByTimeStamp.values()) {
+					// System.out.println("reqNo = " + reqNo);
+					StringBuilder sbb = new StringBuilder();
+					String s = "";
+					for (int p : reqConn.PacketNumber) {
+						PCAPData reqPkt = allPCAPDataPackets.get(p);
+						if (reqPkt.Data.length > 0) {
+							HTTPRequest request = new HTTPRequest();
+							request.SeqNo = reqPkt.transportHeader.SeqNum;
+							request.DataLength = reqPkt.Data.length - reqPkt.startInd;
+
+							// Read data from the request and update the
+							// HTTPRequest instance
+							HTTPReader.readRequest(request, reqPkt);
+							if (request.Host.equals("www.iu.edu") && request.URL.equals("/")) {
+								dis = true;
+								// request.display();
+							} else {
+								dis = false;
+							}
+							// request.display();
+
+							// System.out.println("search seq no " +
+							// request.SeqNo + " " + request.DataLength);
+							long ack = request.SeqNo + request.DataLength;
+
+							ArrayList<HTTPResponse> responses = new ArrayList<HTTPResponse>();
+							// Look for this sequence number in the responses
+							String responseData = "";
+
+							int k = 0;
+
+							for (TCPConnectionTupleAndBytes resConn : downLink.values()) {
+								if (responseData.equals("Content-Length")) {
+									break;
+								}
+
+								/// *
+								// display all packets of downLink
+								// resConn.tcpConnectionTuple.display();
+								// for (int resPktNo : resConn.PacketNumber) {
+								// System.out.print(resPktNo + " ");
+								// }
+								// System.out.println();
+								// */
+
+								//
+								int g = 0;
+								//
+
+								HTTPResponse response = new HTTPResponse();
+								StringBuilder chunkedData = new StringBuilder();
+								for (int resPktNo : resConn.PacketNumber) {
+
+									if (responseData.equals("Content-Length")) {
+										break;
+									}
+									PCAPData resPkt = allPCAPDataPackets.get(resPktNo);
+									if (resPkt.transportHeader.AckNum == request.SeqNo + request.DataLength) {
+										int c = 0;
+										// for (byte[] resData :
+										// resConn.downstreamBytes) {
+										// for (byte[] resData : resPkt.Data) {
+
+										// To-do: sub-array not req until we
+										// reach here, remove from downstream
+										// bytes
+										byte[] resData = Arrays.copyOfRange(resPkt.Data, resPkt.startInd,
+												resPkt.Data.length);
+										c++;
+										if (resData.length > 0) {
+											// Read data from the response
+											// and update the
+											// HTTPResponse instance
+											responseData = HTTPReader.readResponse(response, resPkt, resData);
+											if (responseData.equals("Content-Length")) {
+												sbb = new StringBuilder();
+												sbb.append(request.URL).append(" ").append(request.Host).append(" ")
+														.append(response.StatusCode).append(" ")
+														.append(response.ContentLength);
+												task3.put(reqPkt.PacketTimeStamp, sbb.toString());
+
+												break;
+											} else {
+												// System.out.println(
+												// "----start " +
+												// resPkt.transportHeader.SeqNum
+												// + " " + resPktNo);
+												// System.out.println(c++ +
+												// ": " + responseData);
+//												chunkedData.append("\n\npkt:" + resPktNo + "\n\n").append(responseData);
+												chunkedData.append(responseData);
+//												if(resPktNo == 605) {
+//													response.ContentLength = HTTPReader.countDataBytes(chunkedData.toString());
+//												}
+												// chunkedData = new
+												// StringBuilder(responseData);
+												// System.exit(0);
+											}
+
+											// if (dis) {
+											// System.out.println("haha");
+											// }
+
+											// response.display();
+
+										}
+										if (!responseData.equals("Content-Length")) {
+//											if (g++ == 0) {
+//												response.ContentLength = HTTPReader.countDataBytes(chunkedData.toString());
+//												System.out.println("response.ContentLength = " + response.ContentLength);
+//											}
+											sbb = new StringBuilder();
+											response.ContentLength = HTTPReader.countDataBytes(chunkedData.toString());
+											sbb.append(request.URL).append(" ").append(request.Host).append(" ")
+													.append(response.StatusCode).append(" ")
+													.append(response.ContentLength);
+											task3.put(reqPkt.PacketTimeStamp, sbb.toString());
+//											System.out.println(sbb.toString());
+										}
+
+										// System.out.println("length = " +
+										// chunkedData.length());
+										// System.out.println(chunkedData);
+										// System.exit(0);
+
+									}
+
+								}
+
+							}
+
+						}
+
 					}
+					reqNo++;
+				}
+
+				for (String str : task3.values()) {
+					 System.out.println(str);
 				}
 			}
-			fos.close();
 
-			break; // break case 2
 		}
 
+	}
+
+	private void write(TreeMap<String, ArrayList<byte[]>> task2Out) {
+		// Write Tuple and number of upstream and downstream bytes
+		for (String tupleUpDown : task2Out.keySet()) {
+			System.out.println(tupleUpDown);
+		}
+
+		// Write Data
+		// To-do - System.out.write(per byte)
+		for (ArrayList<byte[]> dataArray : task2Out.values()) {
+			for (byte[] data : dataArray) {
+				System.out.print(new String(data, Charset.forName("ISO-8859-1")));
+			}
+		}
 	}
 
 }
