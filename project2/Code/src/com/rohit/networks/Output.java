@@ -1,7 +1,6 @@
 package com.rohit.networks;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,9 +22,9 @@ public class Output {
 			HashMap<Integer, TreeMap<Long, Integer>> tcpConnections) throws IOException {
 
 		if (taskNumber == 1) {
-			String outString = Task1.TotalPackets + " " + Task1.IPPackets + " " + Task1.TCPPackets + " "
-					+ Task1.TCPConnections;
-			System.out.println(outString);
+			System.out.println(new StringBuilder().append(Task1.TotalPackets).append(" ").append(Task1.IPPackets)
+					.append(" ").append(Task1.TCPPackets).append(" ").append(Task1.UDPPackets).append(" ")
+					.append(Task1.TCPConnections).toString());
 		}
 
 		if (taskNumber == 2 || taskNumber == 3) {
@@ -230,10 +229,11 @@ public class Output {
 		}
 
 		// Write Data
-		// To-do - System.out.write(per byte)
 		for (ArrayList<byte[]> dataArray : task2Out.values()) {
 			for (byte[] data : dataArray) {
-				System.out.print(new String(data, Charset.forName("ISO-8859-1")));
+				for (byte b : data) {
+					System.out.write(b);
+				}
 			}
 		}
 	}

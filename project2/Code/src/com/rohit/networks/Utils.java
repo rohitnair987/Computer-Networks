@@ -126,22 +126,21 @@ public class Utils {
 
 	// Update counts of packet types to output object
 	public static void updateOutputValues(PCAPData pcapData, Output out, int taskNumber) {
-		if (taskNumber == 1) {
-			if (pcapData.linkHeader.ipVersion == 4) {
-				out.Task1.IPPackets++;
-			}
+		if (pcapData.linkHeader.ipVersion == 4) {
+			out.Task1.IPPackets++;
+		}
 
-			switch (pcapData.ipHeader.TransportLayerProtocol) {
-			case UDP:
-				out.Task1.UDPPackets++;
-				break;
+		switch (pcapData.ipHeader.TransportLayerProtocol) {
+		case UDP:
+			out.Task1.UDPPackets++;
+			break;
 
-			case TCP:
-				out.Task1.TCPPackets++;
-				break;
-			default:
-				break;
-			}
+		case TCP:
+			out.Task1.TCPPackets++;
+			break;
+
+		default:
+			break;
 		}
 	}
 
@@ -221,12 +220,12 @@ public class Utils {
 
 	public static TreeMap<Long, TCPConnectionTupleAndBytes> sortByTimeStamp(
 			HashMap<Integer, TCPConnectionTupleAndBytes> upLink) {
-		
+
 		TreeMap<Long, TCPConnectionTupleAndBytes> upLinksSortedByTimeStamp = new TreeMap<Long, TCPConnectionTupleAndBytes>();
-		for(TCPConnectionTupleAndBytes t : upLink.values()) {
+		for (TCPConnectionTupleAndBytes t : upLink.values()) {
 			upLinksSortedByTimeStamp.put(t.PacketTimeStamp, t);
 		}
-		
+
 		return upLinksSortedByTimeStamp;
 	}
 
