@@ -130,29 +130,16 @@ public class Output {
 			}
 
 			if (taskNumber == 3) {
-				int len = 0;
-
-				// for(TCPConnectionTupleAndBytes o : downLink.values()) {
-				// System.out.println(o.toString());
-				// }
-				// System.exit(0);
-
 				// Sort up-links by time-stamp
 				TreeMap<Long, TCPConnectionTupleAndBytes> upLinksSortedByTimeStamp = Utils.sortByTimeStamp(upLink);
-				// free the memory of this objectsince it's not gonna be used
+				// free the memory of this object since it's not gonna be used
 				upLink = null;
 
-				// for (long l : upLinksSortedByTimeStamp.keySet()) {
-				// System.out.println(l);
-				// }
-				// System.exit(0);
 				Map<Long, String> task3 = new TreeMap<>();
 				int reqNo = 1;
-				boolean dis = false;
 				for (TCPConnectionTupleAndBytes reqConn : upLinksSortedByTimeStamp.values()) {
 					// System.out.println("reqNo = " + reqNo);
 					StringBuilder sbb = new StringBuilder();
-					String s = "";
 					for (int p : reqConn.PacketNumber) {
 						PCAPData reqPkt = allPCAPDataPackets.get(p);
 						if (reqPkt.Data.length > 0) {
@@ -163,41 +150,16 @@ public class Output {
 							// Read data from the request and update the
 							// HTTPRequest instance
 							HTTPReader.readRequest(request, reqPkt);
-							if (request.Host.equals("www.iu.edu") && request.URL.equals("/")) {
-								dis = true;
-								// request.display();
-							} else {
-								dis = false;
-							}
-							// request.display();
-
-							// System.out.println("search seq no " +
-							// request.SeqNo + " " + request.DataLength);
 							long ack = request.SeqNo + request.DataLength;
 
 							ArrayList<HTTPResponse> responses = new ArrayList<HTTPResponse>();
 							// Look for this sequence number in the responses
 							String responseData = "";
 
-							int k = 0;
-
 							for (TCPConnectionTupleAndBytes resConn : downLink.values()) {
 								if (responseData.equals("Content-Length")) {
 									break;
 								}
-
-								/// *
-								// display all packets of downLink
-								// resConn.tcpConnectionTuple.display();
-								// for (int resPktNo : resConn.PacketNumber) {
-								// System.out.print(resPktNo + " ");
-								// }
-								// System.out.println();
-								// */
-
-								//
-								int g = 0;
-								//
 
 								HTTPResponse response = new HTTPResponse();
 								StringBuilder chunkedData = new StringBuilder();
@@ -207,18 +169,12 @@ public class Output {
 										break;
 									}
 									PCAPData resPkt = allPCAPDataPackets.get(resPktNo);
-									if (resPkt.transportHeader.AckNum == request.SeqNo + request.DataLength) {
-										int c = 0;
-										// for (byte[] resData :
-										// resConn.downstreamBytes) {
-										// for (byte[] resData : resPkt.Data) {
-
+									if (resPkt.transportHeader.AckNum == ack) {
 										// To-do: sub-array not req until we
 										// reach here, remove from downstream
 										// bytes
 										byte[] resData = Arrays.copyOfRange(resPkt.Data, resPkt.startInd,
 												resPkt.Data.length);
-										c++;
 										if (resData.length > 0) {
 											// Read data from the response
 											// and update the
@@ -233,47 +189,18 @@ public class Output {
 
 												break;
 											} else {
-												// System.out.println(
-												// "----start " +
-												// resPkt.transportHeader.SeqNum
-												// + " " + resPktNo);
-												// System.out.println(c++ +
-												// ": " + responseData);
-//												chunkedData.append("\n\npkt:" + resPktNo + "\n\n").append(responseData);
 												chunkedData.append(responseData);
-//												if(resPktNo == 605) {
-//													response.ContentLength = HTTPReader.countDataBytes(chunkedData.toString());
-//												}
-												// chunkedData = new
-												// StringBuilder(responseData);
-												// System.exit(0);
 											}
-
-											// if (dis) {
-											// System.out.println("haha");
-											// }
-
-											// response.display();
 
 										}
 										if (!responseData.equals("Content-Length")) {
-//											if (g++ == 0) {
-//												response.ContentLength = HTTPReader.countDataBytes(chunkedData.toString());
-//												System.out.println("response.ContentLength = " + response.ContentLength);
-//											}
 											sbb = new StringBuilder();
 											response.ContentLength = HTTPReader.countDataBytes(chunkedData.toString());
 											sbb.append(request.URL).append(" ").append(request.Host).append(" ")
 													.append(response.StatusCode).append(" ")
 													.append(response.ContentLength);
 											task3.put(reqPkt.PacketTimeStamp, sbb.toString());
-//											System.out.println(sbb.toString());
 										}
-
-										// System.out.println("length = " +
-										// chunkedData.length());
-										// System.out.println(chunkedData);
-										// System.exit(0);
 
 									}
 
@@ -288,7 +215,7 @@ public class Output {
 				}
 
 				for (String str : task3.values()) {
-					 System.out.println(str);
+					System.out.println(str);
 				}
 			}
 

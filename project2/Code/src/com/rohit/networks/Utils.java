@@ -227,10 +227,6 @@ public class Utils {
 			upLinksSortedByTimeStamp.put(t.PacketTimeStamp, t);
 		}
 		
-//		for (Long iterable_element : upLinksSortedByTimeStamp.keySet()) {
-//			System.out.println(iterable_element);
-//		}
-		
 		return upLinksSortedByTimeStamp;
 	}
 

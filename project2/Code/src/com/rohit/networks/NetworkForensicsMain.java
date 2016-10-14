@@ -34,9 +34,6 @@ public class NetworkForensicsMain {
 
 		Map<Integer, PCAPData> allPCAPDataPackets = new HashMap<Integer, PCAPData>();
 
-		/*
-		 * src.hashcode + dest.hashcode seqNo, packetNo
-		 */
 		HashMap<Integer, TreeMap<Long, Integer>> tcpConnections = new HashMap<Integer, TreeMap<Long, Integer>>();
 
 		int packetNumber = 1;
@@ -47,9 +44,7 @@ public class NetworkForensicsMain {
 
 			// Read PCAP Header of each packet
 			pcapHeader = PCAPReader.readPCAPHeader();
-//			if(packetNumber>0) {
-//				continue;
-//			}
+
 			if (pcapHeader.NumberOfOctetsOfPacket != pcapHeader.ActualLengthOfPacket) {
 				System.out.println("\nNot a valid packet!");
 				// System.exit(1);
@@ -84,7 +79,6 @@ public class NetworkForensicsMain {
 			packetNumber++;
 			// break;
 		}
-		// System.out.println(tcpConnections.size());
 
 		out.Task1.TotalPackets = packetNumber - 1;
 		out.Task1.TCPConnections = tcpConnections.size();
@@ -95,8 +89,8 @@ public class NetworkForensicsMain {
 
 		out.display(taskNumber, allPCAPDataPackets, tcpConnections);
 
-//		 System.out.println("\nTime taken = " + (new Date().getTime() - d1) +
-//		 "ms");
+		// System.out.println("\nTime taken = " + (new Date().getTime() - d1) +
+		// "ms");
 	}
 
 }
