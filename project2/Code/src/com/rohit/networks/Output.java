@@ -274,10 +274,10 @@ public class Output {
 				}
 
 				// along with timestamp
-//				for(long ts : task3.keySet()) {
-//					System.out.println(ts + " " + task3.get(ts));
-//				}
-				
+				// for(long ts : task3.keySet()) {
+				// System.out.println(ts + " " + task3.get(ts));
+				// }
+
 				for (String str : task3.values()) {
 					System.out.println(str);
 				}
@@ -348,7 +348,6 @@ public class Output {
 				upLink = null;
 
 				Map<Long, HTTPResponse> task4 = new TreeMap<>();
-				int fileNo = 0;
 
 				for (TCPConnectionTupleAndBytes reqConn : upLinksSortedByTimeStamp.values()) {
 					StringBuilder sbb = new StringBuilder();
@@ -374,7 +373,6 @@ public class Output {
 
 							for (TCPConnectionTupleAndBytes resConn : downLink.values()) {
 								HTTPResponse response = new HTTPResponse();
-								StringBuilder chunkedData = new StringBuilder();
 								for (int resPktNo : resConn.PacketNumber) {
 									PCAPData resPkt = allPCAPDataPackets.get(resPktNo);
 									if (resPkt.transportHeader.AckNum == ack) {
@@ -390,49 +388,12 @@ public class Output {
 												response.Content.append(responseData);
 											} else if (responseData.equals("Content-Length")) {
 												response.ContentType = "Content-Length";
-												// sbb = new StringBuilder();
-												// sbb.append(request.URL).append("
-												// ").append(request.Host).append("
-												// ")
-												// .append(response.StatusCode).append("
-												// ")
-												// .append(response.ContentLength);
-												// task4.put(reqPkt.PacketTimeStamp,
-												// sbb.toString());
-
-												// break;
 											} else if (response.ContentType.equals("Transfer-Encoding")
 													|| responseData.equals("Transfer-Encoding")) {
 												response.Content.append(responseData);
 											}
 
 										}
-										/*
-										 * if (!responseData.equals(
-										 * "Content-Length")) {
-										 * 
-										 * sbb = new StringBuilder(); //
-										 * response.ContentLength = //
-										 * HTTPReader.countDataBytes(chunkedData
-										 * .toString()); //
-										 * sbb.append(request.URL).append(" //
-										 * ").append(request.Host).append(" //
-										 * ") //
-										 * .append(response.StatusCode).append("
-										 * // ") //
-										 * .append(response.ContentLength);
-										 * task4.put(reqPkt.PacketTimeStamp,
-										 * chunkedData.toString());
-										 * 
-										 * if (chunkedData.length() > 0) { //
-										 * System.out.println(request.
-										 * FileExtension); //
-										 * System.out.println(chunkedData);
-										 * 
-										 * 
-										 * 
-										 * // System.exit(0); } }
-										 */
 
 									}
 
@@ -440,35 +401,15 @@ public class Output {
 
 								if (response.Content.toString().length() > 0) {
 									int len = request.URL.length();
-									// To-do: change substr to response.fileextension
+									// To-do: change substr to
+									// response.fileextension
 									response.fileName = "/Users/rohit/Drive_Sync/Sem3/CN/Networks/project2/images/";
-									
+
 									response.FileExtension = request.URL.substring(len - 4, len);
 
-//									System.out.println(request.URL + " " + reqPkt.PacketTimeStamp + " "
-//											+ response.Content.toString().length() + " " + fileNo
-//											+ request.URL.substring(len - 4, len));
-									
-//									System.out.println(response.ContentType);	
-									
-//									System.out.println(response.Content);
-
-//									Writer writer = new BufferedWriter(
-//											new OutputStreamWriter(new FileOutputStream(filename), "ISO-8859-1"));
-//									for (byte b : response.Content.toString().getBytes("ISO-8859-1")) {
-//										writer.write(b);
-//									}
-//									writer.close();
-//									System.out.println(request.TimeStamp);
-									if(!task4.containsKey(request.TimeStamp)) {
+									if (!task4.containsKey(request.TimeStamp)) {
 										task4.put(request.TimeStamp, response);
 									}
-									//Utils.writeToFile(response.fileName, response.Content.toString());
-
-									// System.out.println(Integer.toHexString(out.length()));
-									fileNo++;
-//									
-//									System.exit(0);
 								}
 
 							}
@@ -479,17 +420,12 @@ public class Output {
 
 				}
 
-				System.out.println(task4.size());
 				int fileNum = 0;
+				// To-do: one liner
 				for (HTTPResponse response : task4.values()) {
-//					System.out.println(response.fileName);
 					String fileName = response.fileName + fileNum + response.FileExtension;
 					Utils.writeToFile(fileName, response.Content.toString());
 					fileNum++;
-				}
-				
-				for(long ts : task4.keySet()) {
-//					System.out.println();
 				}
 
 			}
