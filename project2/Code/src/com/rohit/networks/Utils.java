@@ -1,5 +1,7 @@
 package com.rohit.networks;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -227,6 +229,37 @@ public class Utils {
 		}
 
 		return upLinksSortedByTimeStamp;
+	}
+
+	public static boolean writeToFile(String fileName, String output) {
+		FileOutputStream fop = null;
+		File file;
+		try {
+
+			file = new File(fileName);
+			fop = new FileOutputStream(file);
+
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			fop.write(output.getBytes("ISO-8859-1"));
+			fop.flush();
+			fop.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (fop != null) {
+					fop.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return true;
 	}
 
 }

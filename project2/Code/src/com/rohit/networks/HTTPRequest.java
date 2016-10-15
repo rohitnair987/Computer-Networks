@@ -1,13 +1,15 @@
 package com.rohit.networks;
 
 public class HTTPRequest {
-	String TimeStamp = "";
+	// To-do: check if this disturbs task 3
+	long TimeStamp = 0;
 	String Method = "";
 	String URL = "";
 	String Protocol = "";
 	String Host = "n/a";
 	long SeqNo = -1;
 	int DataLength = 0;
+	String FileExtension = ".jpg";
 
 	void display() {
 		System.out.println("HTTP Request:");

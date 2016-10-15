@@ -4,7 +4,11 @@ public class HTTPResponse {
 	int StatusCode;
 	String Description = "";
 	int ContentLength = 0;
-
+	String ContentType = "Unknown";
+	StringBuilder Content = new StringBuilder();
+	String fileName = "";
+	String FileExtension = ".jpg";
+	
 	void display() {
 		System.out.println("HTTP Response:");
 		System.out.println("\tStatusCode: " + StatusCode);
