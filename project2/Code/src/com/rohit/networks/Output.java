@@ -156,19 +156,11 @@ public class Output {
 							if (!downLink.containsKey(key)) {
 								downTupleWithBytes.tcpConnectionTuple = down;
 								downTupleWithBytes.PacketNumber.add(packetNo);
-								if (pcapData.Data != null) {
-									downTupleWithBytes.downstreamBytes.add(
-											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
-								}
 								downLink.put(key, downTupleWithBytes);
 							} else {
 								downTupleWithBytes = downLink.get(key);
 								downTupleWithBytes.PacketNumber.add(packetNo);
 								downTupleWithBytes.tcpConnectionTuple = down;
-								if (pcapData.Data != null) {
-									downTupleWithBytes.downstreamBytes.add(
-											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
-								}
 								downLink.replace(key, downTupleWithBytes);
 							}
 
@@ -188,19 +180,11 @@ public class Output {
 							if (!upLink.containsKey(key)) {
 								upTupleWithBytes.tcpConnectionTuple = up;
 								upTupleWithBytes.PacketNumber.add(packetNo);
-								if (pcapData.Data != null) {
-									upTupleWithBytes.upstreamBytes.add(
-											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
-								}
 								upLink.put(key, upTupleWithBytes);
 							} else {
 								upTupleWithBytes = upLink.get(key);
 								upTupleWithBytes.PacketNumber.add(packetNo);
 								upTupleWithBytes.tcpConnectionTuple = up;
-								if (pcapData.Data != null) {
-									upTupleWithBytes.upstreamBytes.add(
-											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
-								}
 								upLink.replace(key, upTupleWithBytes);
 							}
 						}
@@ -245,10 +229,6 @@ public class Output {
 									}
 									PCAPData resPkt = allPCAPDataPackets.get(resPktNo);
 									if (resPkt.transportHeader.AckNum == ack) {
-										// To-do: sub-array not req until we
-										// reach here, remove from
-										// downstream
-										// bytes
 										byte[] resData = Arrays.copyOfRange(resPkt.Data, resPkt.startInd,
 												resPkt.Data.length);
 										if (resData.length > 0) {
