@@ -1,6 +1,7 @@
 package com.rohit.networks;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,13 +22,7 @@ public class Output {
 	void display(int taskNumber, Map<Integer, PCAPData> allPCAPDataPackets,
 			HashMap<Integer, TreeMap<Long, Integer>> tcpConnections) throws IOException {
 
-		if (taskNumber == 1) {
-			System.out.println(new StringBuilder().append(Task1.TotalPackets).append(" ").append(Task1.IPPackets)
-					.append(" ").append(Task1.TCPPackets).append(" ").append(Task1.UDPPackets).append(" ")
-					.append(Task1.TCPConnections).toString());
-		}
-
-		if (taskNumber == 2 || taskNumber == 3) {
+		if (taskNumber == 2) {
 			HashMap<Integer, TCPConnectionTupleAndBytes> downLink = new HashMap<Integer, TCPConnectionTupleAndBytes>();
 			HashMap<Integer, TCPConnectionTupleAndBytes> upLink = new HashMap<Integer, TCPConnectionTupleAndBytes>();
 
@@ -48,7 +43,6 @@ public class Output {
 
 						if (!downLink.containsKey(key)) {
 							downTupleWithBytes.tcpConnectionTuple = down;
-							downTupleWithBytes.PacketNumber.add(packetNo);
 							if (pcapData.Data != null) {
 								downTupleWithBytes.downstreamBytes.add(
 										Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
@@ -56,7 +50,6 @@ public class Output {
 							downLink.put(key, downTupleWithBytes);
 						} else {
 							downTupleWithBytes = downLink.get(key);
-							downTupleWithBytes.PacketNumber.add(packetNo);
 							downTupleWithBytes.tcpConnectionTuple = down;
 							if (pcapData.Data != null) {
 								downTupleWithBytes.downstreamBytes.add(
@@ -80,7 +73,6 @@ public class Output {
 
 						if (!upLink.containsKey(key)) {
 							upTupleWithBytes.tcpConnectionTuple = up;
-							upTupleWithBytes.PacketNumber.add(packetNo);
 							if (pcapData.Data != null) {
 								upTupleWithBytes.upstreamBytes.add(
 										Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
@@ -88,7 +80,6 @@ public class Output {
 							upLink.put(key, upTupleWithBytes);
 						} else {
 							upTupleWithBytes = upLink.get(key);
-							upTupleWithBytes.PacketNumber.add(packetNo);
 							upTupleWithBytes.tcpConnectionTuple = up;
 							if (pcapData.Data != null) {
 								upTupleWithBytes.upstreamBytes.add(
@@ -100,16 +91,16 @@ public class Output {
 				}
 			}
 
-			TreeMap<String, ArrayList<byte[]>> task2Out = new TreeMap<String, ArrayList<byte[]>>();
+			Map<String, ArrayList<byte[]>> task2Out = new TreeMap<String, ArrayList<byte[]>>();
 			StringBuffer sb;
 			for (int hashCode : upLink.keySet()) {
 				// task2 part 1
-				sb = new StringBuffer();
 				TCPConnectionTupleAndBytes tcpConnectionTupleAndBytes = upLink.get(hashCode);
-				sb.append(tcpConnectionTupleAndBytes.tcpConnectionTuple.tupleString());
 				TCPConnectionTupleAndBytes upData = upLink.get(hashCode);
-				sb.append(Utils.getNoOfBytes(upData, 'u') + " ");
 				TCPConnectionTupleAndBytes downData = downLink.get(hashCode);
+				sb = new StringBuffer();
+				sb.append(tcpConnectionTupleAndBytes.tcpConnectionTuple.tupleString());
+				sb.append(Utils.getNoOfBytes(upData, 'u') + " ");
 				sb.append(Utils.getNoOfBytes(downData, 'd'));
 
 				// task2 part 2
@@ -124,20 +115,105 @@ public class Output {
 				task2Out.put(sb.toString(), data);
 			}
 
-			if (taskNumber == 2) {
-				write(task2Out);
+			// Write Tuple and number of upstream and downstream bytes
+			for (String tupleUpDown : task2Out.keySet()) {
+				System.out.println(tupleUpDown);
 			}
 
+			// Write Data
+			for (ArrayList<byte[]> dataArray : task2Out.values()) {
+				for (byte[] data : dataArray) {
+					System.out
+							.print(new String(Arrays.copyOfRange(data, 0, data.length), Charset.forName("ISO-8859-1")));
+				}
+			}
+
+		}
+
+		// ----------------------------------------------------------------
+
+		else {
+
 			if (taskNumber == 3) {
+				HashMap<Integer, TCPConnectionTupleAndBytes> downLink = new HashMap<Integer, TCPConnectionTupleAndBytes>();
+				HashMap<Integer, TCPConnectionTupleAndBytes> upLink = new HashMap<Integer, TCPConnectionTupleAndBytes>();
+
+				for (TreeMap<Long, Integer> seqNoPacketNo : tcpConnections.values()) {
+					for (int packetNo : seqNoPacketNo.values()) {
+						PCAPData pcapData = allPCAPDataPackets.get(packetNo);
+						if (pcapData.transportHeader.SourcePort == 80) {
+							// downlink
+
+							TCPConnectionTuple down = new TCPConnectionTuple();
+							down.ClientIP = pcapData.ipHeader.Destination;
+							down.ClientPort = pcapData.transportHeader.DestinationPort;
+							down.ServerIP = pcapData.ipHeader.Source;
+							down.ServerPort = pcapData.transportHeader.SourcePort;
+
+							int key = down.calculateHashCode();
+							TCPConnectionTupleAndBytes downTupleWithBytes = new TCPConnectionTupleAndBytes();
+
+							if (!downLink.containsKey(key)) {
+								downTupleWithBytes.tcpConnectionTuple = down;
+								downTupleWithBytes.PacketNumber.add(packetNo);
+								if (pcapData.Data != null) {
+									downTupleWithBytes.downstreamBytes.add(
+											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
+								}
+								downLink.put(key, downTupleWithBytes);
+							} else {
+								downTupleWithBytes = downLink.get(key);
+								downTupleWithBytes.PacketNumber.add(packetNo);
+								downTupleWithBytes.tcpConnectionTuple = down;
+								if (pcapData.Data != null) {
+									downTupleWithBytes.downstreamBytes.add(
+											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
+								}
+								downLink.replace(key, downTupleWithBytes);
+							}
+
+						} else if (pcapData.transportHeader.DestinationPort == 80) {
+							// uplink
+
+							TCPConnectionTuple up = new TCPConnectionTuple();
+							up.ClientIP = pcapData.ipHeader.Source;
+							up.ClientPort = pcapData.transportHeader.SourcePort;
+							up.ServerIP = pcapData.ipHeader.Destination;
+							up.ServerPort = pcapData.transportHeader.DestinationPort;
+
+							int key = up.calculateHashCode();
+							TCPConnectionTupleAndBytes upTupleWithBytes = new TCPConnectionTupleAndBytes();
+							upTupleWithBytes.PacketTimeStamp = pcapData.PacketTimeStamp;
+
+							if (!upLink.containsKey(key)) {
+								upTupleWithBytes.tcpConnectionTuple = up;
+								upTupleWithBytes.PacketNumber.add(packetNo);
+								if (pcapData.Data != null) {
+									upTupleWithBytes.upstreamBytes.add(
+											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
+								}
+								upLink.put(key, upTupleWithBytes);
+							} else {
+								upTupleWithBytes = upLink.get(key);
+								upTupleWithBytes.PacketNumber.add(packetNo);
+								upTupleWithBytes.tcpConnectionTuple = up;
+								if (pcapData.Data != null) {
+									upTupleWithBytes.upstreamBytes.add(
+											Arrays.copyOfRange(pcapData.Data, pcapData.startInd, pcapData.Data.length));
+								}
+								upLink.replace(key, upTupleWithBytes);
+							}
+						}
+					}
+				}
+
 				// Sort up-links by time-stamp
 				TreeMap<Long, TCPConnectionTupleAndBytes> upLinksSortedByTimeStamp = Utils.sortByTimeStamp(upLink);
-				// free the memory of this object since it's not gonna be used
+				// Free the memory since it's not gonna be used
 				upLink = null;
 
 				Map<Long, String> task3 = new TreeMap<>();
-				int reqNo = 1;
 				for (TCPConnectionTupleAndBytes reqConn : upLinksSortedByTimeStamp.values()) {
-					// System.out.println("reqNo = " + reqNo);
 					StringBuilder sbb = new StringBuilder();
 					for (int p : reqConn.PacketNumber) {
 						PCAPData reqPkt = allPCAPDataPackets.get(p);
@@ -151,8 +227,8 @@ public class Output {
 							HTTPReader.readRequest(request, reqPkt);
 							long ack = request.SeqNo + request.DataLength;
 
-							ArrayList<HTTPResponse> responses = new ArrayList<HTTPResponse>();
-							// Look for this sequence number in the responses
+							// Look for this sequence number in the
+							// responses
 							String responseData = "";
 
 							for (TCPConnectionTupleAndBytes resConn : downLink.values()) {
@@ -170,7 +246,8 @@ public class Output {
 									PCAPData resPkt = allPCAPDataPackets.get(resPktNo);
 									if (resPkt.transportHeader.AckNum == ack) {
 										// To-do: sub-array not req until we
-										// reach here, remove from downstream
+										// reach here, remove from
+										// downstream
 										// bytes
 										byte[] resData = Arrays.copyOfRange(resPkt.Data, resPkt.startInd,
 												resPkt.Data.length);
@@ -210,32 +287,15 @@ public class Output {
 						}
 
 					}
-					reqNo++;
 				}
 
 				for (String str : task3.values()) {
 					System.out.println(str);
 				}
-			}
 
-		}
-
-	}
-
-	private void write(TreeMap<String, ArrayList<byte[]>> task2Out) {
-		// Write Tuple and number of upstream and downstream bytes
-		for (String tupleUpDown : task2Out.keySet()) {
-			System.out.println(tupleUpDown);
-		}
-
-		// Write Data
-		for (ArrayList<byte[]> dataArray : task2Out.values()) {
-			for (byte[] data : dataArray) {
-				for (byte b : data) {
-					System.out.write(b);
-				}
 			}
 		}
+
 	}
 
 }

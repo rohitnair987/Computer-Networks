@@ -121,7 +121,7 @@ public class NetworkForensicsMain {
 
 			out.display(taskNumber, allPCAPDataPackets, tcpConnections);
 		}
-		System.out.println("\nTime taken = " + (new Date().getTime() - d1) + "ms");
+//		System.out.println("\nTime taken = " + (new Date().getTime() - d1) + "ms");
 	}
 
 }
