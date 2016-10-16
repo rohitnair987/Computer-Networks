@@ -68,10 +68,10 @@ public class HTTPReader {
 				if (line.startsWith("Content-Length")) {
 					response.ContentLength = Utils.stringToNumber(line.split(" ")[1]);
 					response.Content = new StringBuilder(
-							rawResponseString.substring(rawResponseString.indexOf("\r\n\r\n") + 3));
+							rawResponseString.substring(rawResponseString.indexOf("\r\n\r\n") + 4));
 					return "Content-Length";
 				} else if (line.startsWith("Transfer-Encoding:")) {
-					return rawResponseString.substring(rawResponseString.indexOf("\r\n\r\n") + 3);
+					return rawResponseString.substring(rawResponseString.indexOf("\r\n\r\n") + 4);
 				}
 			}
 
@@ -119,7 +119,7 @@ public class HTTPReader {
 				}
 				if (line.startsWith("Transfer-Encoding:")) {
 					response.ContentType = "Transfer-Encoding:";
-					return rawResponseString.substring(rawResponseString.indexOf("\r\n\r\n") + 3);
+					return rawResponseString.substring(rawResponseString.indexOf("\r\n\r\n") + 4);
 				}
 			}
 
@@ -132,30 +132,28 @@ public class HTTPReader {
 	}
 
 	public static int countDataBytes(String chunkedData) {
-		String[] data = chunkedData.split("\r\n");
-
-		int res = (int) Utils.hexToDecimal(data[0].substring(1, data[0].length()));
-		for (int i = 2; i < data.length; i += 2) {
-			res += Utils.hexToDecimal(data[i]);
+		int dataLen = 0;
+		int pos = 0;
+		while(true) {
+			int newLine = chunkedData.indexOf("\r\n");
+			if(newLine == -1) {
+				break;
+			}
+			String chunkSizeHex = chunkedData.substring(0, newLine);
+			pos = chunkSizeHex.length() + 2;
+			int chunkSize = (int) Utils.hexToDecimal(chunkSizeHex);
+			if(chunkSize == 0) {
+				break;
+			}
+			dataLen += chunkSize;
+			pos += chunkSize + 2;
+			if(pos >= chunkedData.length()) {
+				break;
+			}
+			chunkedData = chunkedData.substring(pos);
 		}
-
-		return res;
-	}
-
-	public static StringBuilder getDataBytes(String chunkedData) {
-		String[] data = chunkedData.split("\r\n");
-
-		StringBuilder res = new StringBuilder();
-
-		// int res = (int) Utils.hexToDecimal(data[0].substring(1,
-		// data[0].length()));
-		// res.append(data);
-		// for (int i = 1; i < data.length; i += 2) {
-		// res.append(data);
-		//// res += Utils.hexToDecimal(data[i]);
-		// }
-
-		return res;
+		
+		 return dataLen;
 	}
 
 }
