@@ -44,19 +44,9 @@ public class HTTPReader {
 
 	}
 
-	// Convert Data from byte[] to String
-	
 	// To-do: check if this disturbs task 3
 	public static String readLines(PCAPData pkt) {
-		StringBuffer sb = new StringBuffer();
-		int i = pkt.startInd;
-		
 		return new String(Arrays.copyOfRange(pkt.Data, pkt.startInd, pkt.Data.length), Charset.forName("ISO-8859-1"));
-//		while (i < pkt.Data.length) {
-//			sb.append(pkt.Data[i++]);
-//		}
-
-//		return sb.toString();
 	}
 
 	// Read data from the response and update the HTTPResponse instance

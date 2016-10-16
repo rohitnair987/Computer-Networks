@@ -1,10 +1,6 @@
 package com.rohit.networks;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -350,7 +346,6 @@ public class Output {
 				Map<Long, HTTPResponse> task4 = new TreeMap<>();
 
 				for (TCPConnectionTupleAndBytes reqConn : upLinksSortedByTimeStamp.values()) {
-					StringBuilder sbb = new StringBuilder();
 					for (int p : reqConn.PacketNumber) {
 						PCAPData reqPkt = allPCAPDataPackets.get(p);
 						if (reqPkt.Data.length > 0) {
@@ -401,10 +396,7 @@ public class Output {
 
 								if (response.Content.toString().length() > 0) {
 									int len = request.URL.length();
-									// To-do: change substr to
-									// response.fileextension
 									response.fileName = "/Users/rohit/Drive_Sync/Sem3/CN/Networks/project2/images/";
-
 									response.FileExtension = request.URL.substring(len - 4, len);
 
 									if (!task4.containsKey(request.TimeStamp)) {
@@ -421,12 +413,25 @@ public class Output {
 				}
 
 				int fileNum = 0;
-				// To-do: one liner
+				StringBuilder task4Out = new StringBuilder();
 				for (HTTPResponse response : task4.values()) {
+					String outStr = response.Content.toString();
+
+					// Out file
+					task4Out.append(Integer.toHexString(outStr.length()));
+					task4Out.append("\r\n");
+					task4Out.append(outStr);
+					task4Out.append("\r\n");
+
+					// Write image
 					String fileName = response.fileName + fileNum + response.FileExtension;
-					Utils.writeToFile(fileName, response.Content.toString());
+					Utils.writeToFile(fileName, outStr);
+
 					fileNum++;
 				}
+				task4Out.append("0\r\n\r\n");
+
+				System.out.print(task4Out.toString());
 
 			}
 		}
