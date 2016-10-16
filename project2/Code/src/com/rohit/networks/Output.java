@@ -269,11 +269,6 @@ public class Output {
 					}
 				}
 
-				// along with timestamp
-				// for(long ts : task3.keySet()) {
-				// System.out.println(ts + " " + task3.get(ts));
-				// }
-
 				for (String str : task3.values()) {
 					System.out.println(str);
 				}
@@ -397,7 +392,11 @@ public class Output {
 								if (response.Content.toString().length() > 0) {
 									int len = request.URL.length();
 									response.fileName = "/Users/rohit/Drive_Sync/Sem3/CN/Networks/project2/images/";
-									response.FileExtension = request.URL.substring(len - 4, len);
+									String ext = request.URL.substring(len - 4, len);
+									if (ext.equalsIgnoreCase("webp")) {
+										ext = ".webp";
+									}
+									response.FileExtension = ext;
 
 									if (!task4.containsKey(request.TimeStamp)) {
 										task4.put(request.TimeStamp, response);

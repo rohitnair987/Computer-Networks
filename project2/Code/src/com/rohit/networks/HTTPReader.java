@@ -134,26 +134,26 @@ public class HTTPReader {
 	public static int countDataBytes(String chunkedData) {
 		int dataLen = 0;
 		int pos = 0;
-		while(true) {
+		while (true) {
 			int newLine = chunkedData.indexOf("\r\n");
-			if(newLine == -1) {
+			if (newLine == -1) {
 				break;
 			}
 			String chunkSizeHex = chunkedData.substring(0, newLine);
 			pos = chunkSizeHex.length() + 2;
 			int chunkSize = (int) Utils.hexToDecimal(chunkSizeHex);
-			if(chunkSize == 0) {
+			if (chunkSize == 0) {
 				break;
 			}
 			dataLen += chunkSize;
 			pos += chunkSize + 2;
-			if(pos >= chunkedData.length()) {
+			if (pos >= chunkedData.length()) {
 				break;
 			}
 			chunkedData = chunkedData.substring(pos);
 		}
-		
-		 return dataLen;
+
+		return dataLen;
 	}
 
 }
