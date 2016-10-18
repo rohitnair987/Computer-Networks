@@ -18,36 +18,35 @@ import java.util.*;
 /// path: Path from source to current point
 ///</summary>
 class Point {
-	int x = 0;
-	int y = 0;
-//	StringBuffer path = new StringBuffer(25000);
-	char direction =' ';
+	int x;
+	int y;
+	String path;
 
 	public Point() {
-//		x = 0;
-//		y = 0;
-//		path = "";
+		x = 0;
+		y = 0;
+		path = "";
 	}
 
 	public Point(int a, int b) {
 		x = a;
 		y = b;
-//		path = "";
+		path = "";
 	}
 
-	public Point(int a, int b, char p) {
+	public Point(int a, int b, String p) {
 		x = a;
 		y = b;
-		direction = p;
+		path = p;
 	}
 
-//	public void display() {
-//		System.out.print("Point: (" + x + "," + y + ")");
-//		if (path.length() != 0) {
-//			System.out.print(" and Path: " + path);
-//		}
-//		System.out.println();
-//	}
+	public void display() {
+		System.out.print("Point: (" + x + "," + y + ")");
+		if (path != "") {
+			System.out.print(" and Path: " + path);
+		}
+		System.out.println();
+	}
 
 	public boolean isEqual(Point p) {
 		if (p.x == x && p.y == y) {
@@ -60,22 +59,19 @@ class Point {
 
 public class project1 {
 
-//	private static Point source;
-//	private static int m;
-//	private static int n;
-
 	public static void main(String[] args) {
-		long d1 = new Date().getTime();
-//		System.out.println("aaa");
+
 		if (args.length == 0) {
 			System.out.println("Please enter an argument (task number) as 1, 2, 3 or 4");
-		} else {
+		}
+		else {
 			String task = args[0];
 
 			char maze[][] = getMazeData();
 			if (maze == null) {
 				System.out.println("NO");
-			} else {
+			}
+			else {
 
 				// ********* Task 1 *********
 				if (task.equals("1")) {
@@ -83,34 +79,32 @@ public class project1 {
 				}
 
 				// ********* Task 2 *********
-//				else if (task.equals("2")) {
-//					System.out.println(doesSolutionExist(maze) ? "YES" : "NO");
-//				}
+				else if (task.equals("2")) {
+					System.out.println(doesSolutionExist(maze) ? "YES" : "NO");
+				}
 
 				// ********* Task 3 *********
 				else if (task.equals("3")) {
-//					if (doesSolutionExist(maze)) {
+					if (doesSolutionExist(maze)) {
 						shortestPathBFS(maze);
-//					} else {
-//						System.out.println("NO");
-//					}
+					}
+					else {
+						System.out.println("NO");
+					}
 				}
 
 				// ********* Task 4 *********
-//				else if (task.equals("4")) {
-//					shortestPathTeleporter(maze);
-//				} else {
-//					System.out.println("Please enter first argument (task number) as 1, 2, 3 or 4");
-//				}
+				else if (task.equals("4")) {
+					shortestPathTeleporter(maze);
+				}
+				else {
+					System.out.println("Please enter first argument (task number) as 1, 2, 3 or 4");
+				}
 			}
 		}
-		long d2 = new Date().getTime();
-
-		System.out.println("Time taken = " + (d2 - d1) + "ms");
 	}
-/*
+
 	private static void shortestPathTeleporter(char[][] maze) {
-		System.out.println("shortestPathTeleporter");
 		int m = maze.length;
 		int n = maze[0].length;
 		Queue<Point> q = new LinkedList<Point>();
@@ -127,33 +121,31 @@ public class project1 {
 			}
 
 			if (isNumber(maze[p.x][p.y])) {
-				StringBuffer path = p.path;
+				String path = p.path;
 				p = findMatchingPair(teleportPoints, p, Character.getNumericValue(maze[p.x][p.y]));
 				p.path = path;
 			}
 
-			visited[p.x][p.y] = true;
-			if (p.x + 1 < m && !visited[p.x + 1][p.y]
-					&& (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'D' || isNumber(maze[p.x + 1][p.y]))) {
-				q.add(new Point(p.x + 1, p.y, p.path.append("D")));
+			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'D' || isNumber(maze[p.x + 1][p.y]))) {
+				visited[p.x+1][p.y] = true;
+				q.add(new Point(p.x + 1, p.y, p.path + "D"));
 			}
-			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y]
-					&& (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'D' || isNumber(maze[p.x - 1][p.y]))) {
-				q.add(new Point(p.x - 1, p.y, p.path.append("U")));
+			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'D' || isNumber(maze[p.x - 1][p.y]))) {
+				visited[p.x-1][p.y] = true;
+				q.add(new Point(p.x - 1, p.y, p.path + "U"));
 			}
-			if (p.y + 1 < n && !visited[p.x][p.y + 1]
-					&& (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'D' || isNumber(maze[p.x][p.y + 1]))) {
-				q.add(new Point(p.x, p.y + 1, p.path.append("R")));
+			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'D' || isNumber(maze[p.x][p.y + 1]))) {
+				visited[p.x][p.y+1] = true;
+				q.add(new Point(p.x, p.y + 1, p.path + "R"));
 			}
-			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1]
-					&& (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'D' || isNumber(maze[p.x][p.y - 1]))) {
-				q.add(new Point(p.x, p.y - 1, p.path.append("L")));
+			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'D' || isNumber(maze[p.x][p.y - 1]))) {
+				visited[p.x][p.y-1] = true;
+				q.add(new Point(p.x, p.y - 1, p.path + "L"));
 			}
 		}
 	}
 
 	private static Point[][] findTeleportPoints(char[][] maze) {
-		System.out.println("findTeleportPoints");
 		Point teleportPoints[][] = new Point[10][2];
 
 		for (int i = 0; i < maze.length; i++) {
@@ -162,7 +154,8 @@ public class project1 {
 					int digit = Character.getNumericValue(maze[i][j]);
 					if (teleportPoints[digit][0] == null) {
 						teleportPoints[digit][0] = new Point(i, j);
-					} else {
+					}
+					else {
 						teleportPoints[digit][1] = new Point(i, j);
 					}
 				}
@@ -173,99 +166,77 @@ public class project1 {
 	}
 
 	private static Point findMatchingPair(Point[][] teleportPoints, Point p, int value) {
-		System.out.println("findMatchingPair");
 		if (teleportPoints[value][0].isEqual(p)) {
 			return teleportPoints[value][1];
 		}
 		return teleportPoints[value][0];
 	}
-*/
-	
+
 	private static boolean isNumber(char c) {
-//		System.out.println("isNumber");
 		if (c >= '0' && c <= '9') {
 			return true;
 		}
 		return false;
 	}
 
-
-//	private static boolean doesSolutionExist(char[][] maze) {
-//		System.out.println("doesSolutionExist");
-//		int m = maze.length;
-//		int n = maze[0].length;
-//		Queue<Point> q = new LinkedList<Point>();
-//		q.add(findSource(maze));
-//		boolean visited[][] = new boolean[m][n];
-//
-//		while (!q.isEmpty()) {
-//			Point p = q.remove();
-//			if (maze[p.x][p.y] == 'D') {
-//				return true;
-//			}
-//			addNeighbors(q, p, visited, maze);
-//		}
-//		return false;
-//	}
-
-	private static void shortestPathBFS(char[][] maze) {
-		System.out.println("shortestPathBFS");
+	private static boolean doesSolutionExist(char[][] maze) {
 		int m = maze.length;
 		int n = maze[0].length;
 		Queue<Point> q = new LinkedList<Point>();
-		System.out.println("start source search");
 		q.add(findSource(maze));
-		System.out.println("end source search");
 		boolean visited[][] = new boolean[m][n];
 
-		int count=0;
+		while (!q.isEmpty()) {
+			Point p = q.remove();
+			if (maze[p.x][p.y] == 'D') {
+				return true;
+			}
+			addNeighbors(q, p, visited, maze);
+		}
+		return false;
+	}
+
+	private static void shortestPathBFS(char[][] maze) {
+		int m = maze.length;
+		int n = maze[0].length;
+		Queue<Point> q = new LinkedList<Point>();
+		q.add(findSource(maze));
+		boolean visited[][] = new boolean[m][n];
+
 		while (!q.isEmpty()) {
 			Point p = q.remove();
 
 			if (maze[p.x][p.y] == 'D') {
-//				System.out.println(p.path);
-				System.out.println("done");
+				System.out.println(p.path);
 				break;
 			}
-//			addNeighbors(q, p, visited, maze);
-			visited[p.x][p.y] = true;
-			System.out.print("n" + count++ + " ");
-			if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'D')) {
-				q.add(new Point(p.x + 1, p.y, 'D'));
-			}
-			if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'D')) {
-				q.add(new Point(p.x - 1, p.y, 'U'));
-			}
-			if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'D')) {
-				q.add(new Point(p.x, p.y + 1, 'R'));
-			}
-			if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'D')) {
-				q.add(new Point(p.x, p.y - 1, 'L'));
-			}
+			addNeighbors(q, p, visited, maze);
 		}
 	}
 
-//	private static void addNeighbors(Queue<Point> q, Point p, boolean[][] visited, char[][] maze) {
-////		System.out.println("addNeighbors");
-//		int m = maze.length;
-//		int n = maze[0].length;
-//		visited[p.x][p.y] = true;
-//		if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'D')) {
-//			q.add(new Point(p.x + 1, p.y, p.path.append("D")));
-//		}
-//		if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'D')) {
-//			q.add(new Point(p.x - 1, p.y, p.path.append("U")));
-//		}
-//		if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'D')) {
-//			q.add(new Point(p.x, p.y + 1, p.path.append("R")));
-//		}
-//		if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'D')) {
-//			q.add(new Point(p.x, p.y - 1, p.path.append("L")));
-//		}
-//	}
+	private static void addNeighbors(Queue<Point> q, Point p, boolean[][] visited, char[][] maze) {
+		int m = maze.length;
+		int n = maze[0].length;
+		visited[p.x][p.y] = true;
+		if (p.x + 1 < m && !visited[p.x + 1][p.y] && (maze[p.x + 1][p.y] == '.' || maze[p.x + 1][p.y] == 'D')) {
+			visited[p.x+1][p.y] = true;
+			q.add(new Point(p.x + 1, p.y, p.path + "D"));
+		}
+		if (p.x - 1 >= 0 && !visited[p.x - 1][p.y] && (maze[p.x - 1][p.y] == '.' || maze[p.x - 1][p.y] == 'D')) {
+			visited[p.x-1][p.y] = true;
+			q.add(new Point(p.x - 1, p.y, p.path + "U"));
+		}
+		if (p.y + 1 < n && !visited[p.x][p.y + 1] && (maze[p.x][p.y + 1] == '.' || maze[p.x][p.y + 1] == 'D')) {
+			visited[p.x][p.y+1] = true;
+			q.add(new Point(p.x, p.y + 1, p.path + "R"));
+		}
+		if (p.y - 1 >= 0 && !visited[p.x][p.y - 1] && (maze[p.x][p.y - 1] == '.' || maze[p.x][p.y - 1] == 'D')) {
+			visited[p.x][p.y-1] = true;
+			q.add(new Point(p.x, p.y - 1, p.path + "L"));
+		}
+	}
 
 	private static Point findSource(char[][] maze) {
-		System.out.println("findSource");
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[0].length; j++) {
 				if (maze[i][j] == 'S') {
@@ -277,7 +248,6 @@ public class project1 {
 	}
 
 	private static boolean isMazeLegal(char[][] grid) {
-		System.out.println("isMazeLegal");
 		int sourceCount = 0, destinationCount = 0;
 		int noOfColumns = grid[0].length;
 		for (int i = 0; i < grid.length; i++) {
@@ -287,9 +257,11 @@ public class project1 {
 			for (int j = 0; j < noOfColumns; j++) {
 				if (grid[i][j] == 'S') {
 					sourceCount++;
-				} else if (grid[i][j] == 'D') {
+				}
+				else if (grid[i][j] == 'D') {
 					destinationCount++;
-				} else if (!(grid[i][j] == '.' || grid[i][j] == '#')) {
+				}
+				else if (!(grid[i][j] == '.' || grid[i][j] == '#')) {
 					return false;
 				}
 			}
@@ -298,7 +270,6 @@ public class project1 {
 	}
 
 	private static char[][] getMazeData() {
-		System.out.println("getMazeData");
 		int rows = 5000;
 		int columns = 5000;
 		char grid[][] = new char[rows][columns];
@@ -317,7 +288,7 @@ public class project1 {
 				inputChar = (char) inputCharValue;
 				if (inputChar == '\n') {
 					rowNumber++;
-					if (rowNumber > 5000) {
+					if(rowNumber > 5000){
 						return null;
 					}
 					if (columns == 5000) {
@@ -331,7 +302,7 @@ public class project1 {
 					continue;
 				}
 				grid[rowNumber][columnNumber++] = inputChar;
-				if (columnNumber > 5000) {
+				if(columnNumber > 5000){
 					return null;
 				}
 
@@ -346,14 +317,9 @@ public class project1 {
 				}
 
 				// Blank line
-				if ((inputChar == '\n' && previousInputChar == '\n')
-						|| (inputChar == '\r' && previousInputChar == '\r')) {
+				if ((inputChar == '\n' && previousInputChar == '\n') || (inputChar == '\r' && previousInputChar == '\r')) {
 					return null;
 				}
-				
-//				if(inputChar == 'S'){
-//					source = new Point()
-//				}
 
 				previousInputChar = inputChar;
 
@@ -384,9 +350,7 @@ public class project1 {
 	}
 
 	private static boolean isValid(char last) {
-//		System.out.println("isValid");
-		if (last == '#' || last == '.' || last == 'S' || last == 'D' || last == '\n' || last == '\r' || last == '?'
-				|| isNumber(last)) {
+		if (last == '#' || last == '.' || last == 'S' || last == 'D' || last == '\n' || last == '\r' || last == '?' || isNumber(last)) {
 			return true;
 		}
 		return false;
