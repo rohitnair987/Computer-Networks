@@ -51,9 +51,9 @@ public class HTTPReader {
 
 	// Read data from the response and update the HTTPResponse instance
 	public static String readResponse(HTTPResponse response, PCAPData resPkt, byte[] resData) {
-		String first4Chars = new String(Arrays.copyOfRange(resData, 0, 4));
+		String first8Chars = new String(Arrays.copyOfRange(resData, 0, 8));
 
-		if (first4Chars.equals("HTTP")) {
+		if (first8Chars.equals("HTTP/1.1")) {
 			String rawResponseString = readLines(resPkt);
 			String[] responseLines = rawResponseString.split("\r\n");
 
