@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public enum ConstantsEnum {
 	TCP, UDP, ICMP, OTHER;
 
