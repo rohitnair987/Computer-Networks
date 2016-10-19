@@ -239,8 +239,15 @@ public class Output {
 											if (responseData.equals("Content-Length")) {
 												sbb = new StringBuilder();
 												sbb.append(request.URL).append(" ").append(request.Host).append(" ")
-														.append(response.StatusCode).append(" ")
-														.append(response.ContentLength);
+														.append(response.StatusCode).append(" ");
+												if (request.Method.equalsIgnoreCase("HEAD")
+														|| response.StatusCode == 204 || response.StatusCode == 302
+														|| Integer.toString(response.StatusCode).charAt(0) == '1') {
+													sbb.append("0");
+												} else {
+													sbb.append(response.ContentLength);
+												}
+
 												task3.put(reqPkt.PacketTimeStamp, sbb.toString());
 
 												break;
@@ -253,8 +260,14 @@ public class Output {
 											sbb = new StringBuilder();
 											response.ContentLength = HTTPReader.countDataBytes(chunkedData.toString());
 											sbb.append(request.URL).append(" ").append(request.Host).append(" ")
-													.append(response.StatusCode).append(" ")
-													.append(response.ContentLength);
+													.append(response.StatusCode).append(" ");
+											if (request.Method.equalsIgnoreCase("HEAD") || response.StatusCode == 204
+													|| response.StatusCode == 302
+													|| Integer.toString(response.StatusCode).charAt(0) == '1') {
+												sbb.append("0");
+											} else {
+												sbb.append(response.ContentLength);
+											}
 											task3.put(reqPkt.PacketTimeStamp, sbb.toString());
 										}
 
@@ -423,8 +436,9 @@ public class Output {
 					task4Out.append("\r\n");
 
 					// Write image
-					String fileName = response.fileName + fileNum + response.FileExtension;
-					Utils.writeToFile(fileName, outStr);
+					// String fileName = response.fileName + fileNum +
+					// response.FileExtension;
+					// Utils.writeToFile(fileName, outStr);
 
 					fileNum++;
 				}

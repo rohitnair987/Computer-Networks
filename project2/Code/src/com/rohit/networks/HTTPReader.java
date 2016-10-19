@@ -19,7 +19,7 @@ public class HTTPReader {
 		if (taskNumber == 4) {
 			int len = request.URL.length();
 			if (len > 4) {
-				String pattern = "(.jPg|.png|.Jpeg|.giF|.webp)$";
+				String pattern = "(.jPg|.png|.Jpeg|.giF|.webp)(.gzip)?$";
 				Pattern r = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 				Matcher m = r.matcher(request.URL);
 				if (!m.find()) {
