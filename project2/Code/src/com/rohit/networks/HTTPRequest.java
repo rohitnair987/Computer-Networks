@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public class HTTPRequest {
 	// To-do: check if this disturbs task 3
 	long TimeStamp = 0;
