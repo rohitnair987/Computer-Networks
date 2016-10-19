@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;

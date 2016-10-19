@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public class TransportHeader {
 	/* Common fields */
 	// 2 bytes

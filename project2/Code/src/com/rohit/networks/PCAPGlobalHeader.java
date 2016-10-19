@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public class PCAPGlobalHeader {
 	long Snaplength;
 	LinkLayerProtocolEnum LinkLayerProtocol;

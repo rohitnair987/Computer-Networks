@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public class TCPConnectionTuple {
 	String ClientIP = "";
 	int ClientPort = 0;

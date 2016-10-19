@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -19,7 +17,7 @@ public class HTTPReader {
 		if (taskNumber == 4) {
 			int len = request.URL.length();
 			if (len > 4) {
-				String pattern = "(.jPg|.png|.Jpeg|.giF|.webp)(.gzip)?$";
+				String pattern = "(.jPg|.png|.Jpeg|.giF|.webp)(.gzip|.gz)?$";
 				Pattern r = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 				Matcher m = r.matcher(request.URL);
 				if (!m.find()) {

@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public class HTTPResponse {
 	int StatusCode;
 	String Description = "";

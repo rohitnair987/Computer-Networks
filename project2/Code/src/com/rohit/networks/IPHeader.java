@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public class IPHeader {
 	// 4 bits
 	int Version;

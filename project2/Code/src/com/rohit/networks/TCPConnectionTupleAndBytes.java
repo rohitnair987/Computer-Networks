@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 import java.util.ArrayList;
 
 public class TCPConnectionTupleAndBytes {

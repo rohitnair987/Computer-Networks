@@ -1,5 +1,3 @@
-package com.rohit.networks;
-
 public class PCAPData {
 	long PacketTimeStamp;
 	LinkHeader linkHeader = new LinkHeader();
