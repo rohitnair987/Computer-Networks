@@ -434,9 +434,14 @@ public class Output {
 					task4Out.append("\r\n");
 
 					// Write image
+<<<<<<< HEAD
 					// String fileName = response.fileName + fileNum +
 					// response.FileExtension;
 					// Utils.writeToFile(fileName, outStr);
+=======
+//					String fileName = response.fileName + fileNum + response.FileExtension;
+//					Utils.writeToFile(fileName, outStr);
+>>>>>>> cb928a64ec3c2dddd5c73064a56d7d519b914eda
 
 					fileNum++;
 				}
