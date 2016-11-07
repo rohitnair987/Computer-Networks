@@ -1,0 +1,16 @@
+javac project1.java
+
+java project1 1 < ../testdata/task1.in.1 > ../testdata/task1.out.1
+java project1 1 < ../testdata/task1.in.2 > ../testdata/task1.out.2
+java project1 1 < ../testdata/task1.in.3 > ../testdata/task1.out.3
+java project1 1 < ../testdata/task1.in.4 > ../testdata/task1.out.4
+java project1 1 < ../testdata/task1.in.5 > ../testdata/task1.out.5
+
+java project1 2 < ../testdata/task2.in.1 > ../testdata/task2.out.1
+java project1 2 < ../testdata/task2.in.2 > ../testdata/task2.out.2
+
+java project1 3 < ../testdata/task3.in.1 > ../testdata/task3.out.1
+java project1 3 < ../testdata/task3.in.2 > ../testdata/task3.out.2
+
+java project1 4 < ../testdata/task4.in.1 > ../testdata/task4.out.1
+java project1 4 < ../testdata/task4.in.2 > ../testdata/task4.out.2

@@ -1,0 +1,17 @@
+java NetworkForensicsMain 1 < project2_testdata/task1/task1.test1.pcap > project2_testdata/task1/task1.test1.out
+java NetworkForensicsMain 1 < project2_testdata/task1/task1.test2.pcap > project2_testdata/task1/task1.test2.out
+java NetworkForensicsMain 1 < project2_testdata/task1/task1.test3.pcap > project2_testdata/task1/task1.test3.out
+
+java NetworkForensicsMain 2 < project2_testdata/task2/task2.test1.pcap > project2_testdata/task2/task2.test1.out
+java NetworkForensicsMain 2 < project2_testdata/task2/task2.test2.pcap > project2_testdata/task2/task2.test2.out
+java NetworkForensicsMain 2 < project2_testdata/task2/task2.test3.pcap > project2_testdata/task2/task2.test3.out
+java NetworkForensicsMain 2 < project2_testdata/task2/task2.test4.pcap > project2_testdata/task2/task2.test4.out
+
+java NetworkForensicsMain 3 < project2_testdata/task3/task3.test1.pcap > project2_testdata/task3/task3.test1.out
+java NetworkForensicsMain 3 < project2_testdata/task3/task3.test2.pcap > project2_testdata/task3/task3.test2.out
+java NetworkForensicsMain 3 < project2_testdata/task3/task3.test3.pcap > project2_testdata/task3/task3.test3.out
+java NetworkForensicsMain 3 < project2_testdata/task3/task3.test4.pcap > project2_testdata/task3/task3.test4.out
+java NetworkForensicsMain 3 < project2_testdata/task3/task3.test5.pcap > project2_testdata/task3/task3.test5.out
+
+java NetworkForensicsMain 4 < project2_testdata/task4/task4.test1.pcap > project2_testdata/task4/task4.test1.out
+java NetworkForensicsMain 4 < project2_testdata/task4/task4.test2.pcap > project2_testdata/task4/task4.test2.out

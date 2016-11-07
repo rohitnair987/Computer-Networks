@@ -1,14 +1,49 @@
-diff ../testdata/task1.out.1 ../testdata_original/task1.out.1
-diff ../testdata/task1.out.2 ../testdata_original/task1.out.2
-diff ../testdata/task1.out.3 ../testdata_original/task1.out.3
-diff ../testdata/task1.out.4 ../testdata_original/task1.out.4
-diff ../testdata/task1.out.5 ../testdata_original/task1.out.5
+diff ../project1_testdata/task1/1.out ../project1_testdata_original/task1/1.out
+diff ../project1_testdata/task1/2.out ../project1_testdata_original/task1/2.out
+diff ../project1_testdata/task1/3.out ../project1_testdata_original/task1/3.out
+diff ../project1_testdata/task1/4.out ../project1_testdata_original/task1/4.out
+diff ../project1_testdata/task1/5.out ../project1_testdata_original/task1/5.out
 
-diff ../testdata/task2.out.1 ../testdata_original/task2.out.1
-diff ../testdata/task2.out.2 ../testdata_original/task2.out.2
+diff ../project1_testdata/task2/1.out ../project1_testdata_original/task2/1.out
+diff ../project1_testdata/task2/2.out ../project1_testdata_original/task2/2.out
+diff ../project1_testdata/task2/3.out ../project1_testdata_original/task2/3.out
+diff ../project1_testdata/task2/4.out ../project1_testdata_original/task2/4.out
+diff ../project1_testdata/task2/5.out ../project1_testdata_original/task2/5.out
 
-diff ../testdata/task3.out.1 ../testdata_original/task3.out.1
-diff ../testdata/task3.out.2 ../testdata_original/task3.out.2
+cat project1_testdata/task3/1.out | wc -c
+cat project1_testdata_original/task3/1.out | wc -c
 
-diff ../testdata/task4.out.1 ../testdata_original/task4.out.1
-diff ../testdata/task4.out.2 ../testdata_original/task4.out.2
+cat project1_testdata/task3/2.out | wc -c
+cat project1_testdata_original/task3/2.out | wc -c
+
+cat project1_testdata/task3/3.out | wc -c
+cat project1_testdata_original/task3/3.out | wc -c
+
+cat project1_testdata/task3/4.out | wc -c
+cat project1_testdata_original/task3/4.out | wc -c
+
+cat project1_testdata/task3/5.out | wc -c
+cat project1_testdata_original/task3/5.out | wc -c
+
+cat project1_testdata/task3/6.out | wc -c
+cat project1_testdata_original/task3/6.out | wc -c
+
+
+
+cat project1_testdata/task4/1.out | wc -c
+cat project1_testdata_original/task4/1.out | wc -c
+
+cat project1_testdata/task4/2.out | wc -c
+cat project1_testdata_original/task4/2.out | wc -c
+
+cat project1_testdata/task4/3.out | wc -c
+cat project1_testdata_original/task4/3.out | wc -c
+
+cat project1_testdata/task4/4.out | wc -c
+cat project1_testdata_original/task4/4.out | wc -c
+
+cat project1_testdata/task4/5.out | wc -c
+cat project1_testdata_original/task4/5.out | wc -c
+
+cat project1_testdata/task4/6.out | wc -c
+cat project1_testdata_original/task4/6.out | wc -c
