@@ -6,10 +6,44 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
+
+class Receiver implements Runnable {
+
+	Scanner cin;
+	List<String> events;
+
+	public Receiver(List<String> events) {
+		cin = new Scanner(System.in);
+		this.events = events;
+	}
+
+	public void run() {
+		while (true) {
+			try {
+				String line = cin.nextLine();
+				if (line.equalsIgnoreCase("events")) {
+					if (events.size() == 0) {
+						System.out.println("\nNo events logged at the server");
+					} else {
+						System.out.println("\n--------------------------------------");
+						System.out.println("List of requests to the server:");
+						for (String event : events) {
+							System.out.println(event);
+						}
+						System.out.println("--------------------------------------");
+					}
+					System.out.println();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}
 
 public class Server {
 
@@ -27,7 +61,7 @@ public class Server {
 	 */
 	private static Map<String, PrintWriter> activeUsers = new HashMap<String, PrintWriter>();
 
-	/*
+	/**
 	 * Events for logging
 	 */
 	private static List<String> events = new ArrayList<>();
@@ -38,6 +72,10 @@ public class Server {
 	 */
 	public static void main(String[] args) throws Exception {
 		System.out.println("The Server is running.");
+
+		Thread consoleReader = new Thread(new Receiver(events));
+		consoleReader.start();
+
 		ServerSocket listener = new ServerSocket(PORT);
 		try {
 			while (true) {
@@ -87,9 +125,7 @@ public class Server {
 				// checking for the existence of a name and adding the name
 				// must be done while locking the set of names.
 				while (true) {
-					// out.println("SUBMITNAME");
 					event = in.readLine();
-					System.out.println("At Server: " + event);
 					events.add(event);
 
 					if (event == null) {
@@ -107,44 +143,36 @@ public class Server {
 					switch (command) {
 					case "register":
 						if (words.length != 3) {
-							System.out.println("register");
 							out.println("Invalid Register command, try again");
 							break;
 						}
 						if (!names.containsKey(words[1])) {
-							System.out.println("register success");
 							names.put(words[1], words[2]);
 							out.println("Registration successful. Welcome to Hoosier Chat " + words[1] + " !!");
 						} else {
-							System.out.println("register failed");
 							out.println("This user already exists, please try another one");
 						}
 						break;
 
 					case "login":
 						if (activeUsers.size() >= 16) {
-							System.out.println("Server full, please come back later");
 							out.println("Server full, please come back later");
 							break;
 						}
 						if (words.length != 3) {
-							System.out.println("login");
 							out.println("Invalid Login command, try again");
 							break;
 						}
 						String pw = names.get(words[1]);
 						if (pw == null) {
-							System.out.println("User does not exist. Try again.");
 							out.println("User does not exist. Try again.");
 						}
 						// max 16
 						else if (pw.equals(words[2])) {
 							activeUsers.put(words[1], out);
 							currentUser = words[1];
-							System.out.println("Login success! Start typing ...");
 							out.println("Login success! Start typing ...");
 						} else {
-							System.out.println("Wrong password. Try again.");
 							out.println("Wrong password. Try again.");
 						}
 						break;
@@ -153,7 +181,6 @@ public class Server {
 						boolean flag = false;
 						for (Entry<String, PrintWriter> userEntry : activeUsers.entrySet()) {
 							if (userEntry.getValue().equals(out)) {
-								System.out.println("See ya");
 								out.println("See ya");
 								activeUsers.remove(userEntry.getKey());
 								flag = true;
@@ -161,7 +188,6 @@ public class Server {
 							}
 						}
 						if (!flag) {
-							System.out.println("You're not logged in");
 							out.println("You're not logged in");
 						}
 
@@ -180,7 +206,6 @@ public class Server {
 								out.println(currentUser + ": " + words[2]);
 							}
 						} else {
-							System.out.println("Invalid send command. Please try again.");
 							out.println("Invalid send command. Please try again.");
 						}
 						break;
@@ -200,19 +225,18 @@ public class Server {
 								out.println(words[2]);
 							}
 						} else {
-							System.out.println("Invalid send command. Please try again.");
 							out.println("Invalid send command. Please try again.");
 						}
 						break;
 
 					case "list":
-						for(String user : activeUsers.keySet()) {
+						for (String user : activeUsers.keySet()) {
 							out.println(user);
 						}
 						break;
-					
+
 					default:
-						System.out.println("Invalid command. Please try again.");
+						out.println("Invalid command. Please try again.");
 					}
 
 					// if (event == null) {
