@@ -76,6 +76,9 @@ public class Server {
 		Thread consoleReader = new Thread(new Receiver(events));
 		consoleReader.start();
 
+		// Thread userPinger = new Thread(new Pinger(events));
+		// userPinger.start();
+
 		ServerSocket listener = new ServerSocket(PORT);
 		try {
 			while (true) {
@@ -126,6 +129,7 @@ public class Server {
 				// must be done while locking the set of names.
 				while (true) {
 					event = in.readLine();
+					System.out.println(event);
 					events.add(event);
 
 					if (event == null) {
@@ -133,104 +137,143 @@ public class Server {
 					}
 
 					String words[] = event.split(" ");
-					if (words.length < 1) {
-						System.out.println("words too small");
-						continue;
-					}
 
 					String command = words[0].toLowerCase();
 
 					switch (command) {
+					
 					case "register":
+
 						if (words.length != 3) {
 							out.println("Invalid Register command, try again");
-							break;
 						}
-						if (!names.containsKey(words[1])) {
-							names.put(words[1], words[2]);
-							out.println("Registration successful. Welcome to Hoosier Chat " + words[1] + " !!");
-						} else {
-							out.println("This user already exists, please try another one");
+
+						else {
+							String res = checkString(words[1]);
+							if (!res.equals("Yes")) {
+								out.println(res);
+								break;
+							}
+
+							res = checkString(words[2]);
+							if (!res.equals("Yes")) {
+								out.println(res);
+								break;
+							}
+
+							if (!names.containsKey(words[1])) {
+								names.put(words[1], words[2]);
+								out.println("Registration successful. Welcome to Hoosier Chat " + words[1] + " !!");
+							}
+
+							else {
+								out.println("This user already exists, please try another one");
+							}
+
 						}
 						break;
 
 					case "login":
-						if (activeUsers.size() >= 16) {
-							out.println("Server full. Please come back later");
-							break;
+
+						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
+							if (activeUsers.size() >= 16) {
+								out.println("Server full. Please come back later");
+							} else {
+								if (words.length != 3) {
+									out.println("Invalid Login command, try again");
+								} else {
+									String pw = names.get(words[1]);
+									if (pw == null) {
+										out.println("User does not exist. Try again.");
+									} else if (pw.equals(words[2])) {
+										activeUsers.put(words[1], out);
+										currentUser = words[1];
+										out.println("Login success! Start typing ...");
+									} else {
+										out.println("Wrong password. Try again.");
+									}
+								}
+
+							}
+
 						}
-						if (words.length != 3) {
-							out.println("Invalid Login command, try again");
-							break;
+
+						else {
+							out.println("You're already logged in as " + currentUser);
 						}
-						String pw = names.get(words[1]);
-						if (pw == null) {
-							out.println("User does not exist. Try again.");
-						}
-						// max 16
-						else if (pw.equals(words[2])) {
-							activeUsers.put(words[1], out);
-							currentUser = words[1];
-							out.println("Login success! Start typing ...");
-						} else {
-							out.println("Wrong password. Try again.");
-						}
+
 						break;
 
+						
 					case "logout":
-						boolean flag = false;
-						for (Entry<String, PrintWriter> userEntry : activeUsers.entrySet()) {
-							if (userEntry.getValue().equals(out)) {
-								out.println("See ya");
-								activeUsers.remove(userEntry.getKey());
-								flag = true;
-								break;
-							}
-						}
-						if (!flag) {
+						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
 							out.println("You're not logged in");
 						}
 
-					case "send":
-						if (words.length == 2) {
-							for (Entry<String, PrintWriter> targetEntry : activeUsers.entrySet()) {
-								if (targetEntry.getKey() != currentUser) {
-									targetEntry.getValue().println(currentUser + ": " + words[1]);
-								}
-							}
-						} else if (words.length == 3) {
-							PrintWriter targetUser = activeUsers.get(words[1]);
-							if (targetUser == null) {
-								out.println(words[1] + " is inactive. Please try later.");
-							} else {
-								targetUser.println(currentUser + ": " + words[2]);
-							}
-						} else {
-							out.println("Invalid send command. Please try again.");
+						else {
+							out.println("See ya!");
+							activeUsers.remove(currentUser);
 						}
 						break;
 
-					case "senda":
-						if (words.length == 2) {
-							for (Entry<String, PrintWriter> targetEntry : activeUsers.entrySet()) {
-								if (targetEntry.getKey() != currentUser) {
-									targetEntry.getValue().println(words[1]);
+						
+					case "send":
+						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
+							out.println("Please login. Register if you do not have an account");
+						}
+
+						// To-do: refresh
+						else {
+							if (words.length == 2) {
+								for (Entry<String, PrintWriter> targetEntry : activeUsers.entrySet()) {
+									if (targetEntry.getKey() != currentUser) {
+										targetEntry.getValue().println(currentUser + ": " + words[1]);
+									}
 								}
-							}
-						} else if (words.length == 3) {
-							PrintWriter targetUser = activeUsers.get(words[1]);
-							if (targetUser == null) {
-								out.println(words[1] + " is inactive. Please try later.");
+							} else if (words.length == 3) {
+								PrintWriter targetUser = activeUsers.get(words[1]);
+								if (targetUser == null) {
+									out.println(words[1] + " is inactive. Please try later.");
+								} else {
+									targetUser.println(currentUser + ": " + words[2]);
+								}
 							} else {
-								targetUser.println(words[2]);
+								out.println("Invalid send command. Please try again.");
 							}
-						} else {
-							out.println("Invalid send command. Please try again.");
+						}
+						break;
+
+						
+					case "senda":
+						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
+							out.println("Please login. Register if you do not have an account");
+						}
+
+						else {
+							if (words.length == 2) {
+								for (Entry<String, PrintWriter> targetEntry : activeUsers.entrySet()) {
+									if (targetEntry.getKey() != currentUser) {
+										targetEntry.getValue().println(words[1]);
+									}
+								}
+							} else if (words.length == 3) {
+								PrintWriter targetUser = activeUsers.get(words[1]);
+								if (targetUser == null) {
+									out.println(words[1] + " is inactive. Please try later.");
+								} else {
+									targetUser.println(words[2]);
+								}
+							} else {
+								out.println("Invalid send command. Please try again.");
+							}
 						}
 						break;
 
 					case "list":
 						for (String user : activeUsers.keySet()) {
+							if (isUserOnline(user)) {
+
+							}
 							out.println(user);
 						}
 						break;
@@ -257,6 +300,32 @@ public class Server {
 				// } catch (IOException e) {
 				// }
 			}
+		}
+
+		private String checkString(String s) {
+			int len = s.length();
+			if (len < 4 || len > 8) {
+				return "Username and password should be 4 t0 8 characters long";
+			}
+			String pattern = "^[a-zA-Z0-9]*$";
+			if (s.matches(pattern)) {
+				return "Yes";
+			}
+			return "Only alphanumerics are allowed";
+		}
+
+		private boolean isUserLoggedIn(String user) {
+			for (String activeUser : activeUsers.keySet()) {
+				if (user.equals(activeUser)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private boolean isUserOnline(String user) {
+
+			return false;
 		}
 	}
 }
