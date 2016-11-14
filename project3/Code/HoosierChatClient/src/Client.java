@@ -63,7 +63,7 @@ public class Client {
 
 		out.println(line);
 
-		Thread receiver = new Thread(new Receiver(in));
+		Thread receiver = new Thread(new Receiver(in, out));
 		receiver.start();
 
 		while (true) {
@@ -80,15 +80,22 @@ public class Client {
 class Receiver implements Runnable {
 
 	BufferedReader in;
+	PrintWriter out;
 
-	public Receiver(BufferedReader in) {
+	public Receiver(BufferedReader in, PrintWriter out) {
 		this.in = in;
+		this.out = out;
 	}
 
 	public void run() {
 		while (true) {
 			try {
-				System.out.println(in.readLine());
+				String line = in.readLine();
+				if (line.equals("status")) {
+					out.println("yes");
+				} else {
+					System.out.println(line);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
