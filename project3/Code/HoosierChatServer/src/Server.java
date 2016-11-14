@@ -156,7 +156,7 @@ public class Server {
 
 					case "login":
 						if (activeUsers.size() >= 16) {
-							out.println("Server full, please come back later");
+							out.println("Server full. Please come back later");
 							break;
 						}
 						if (words.length != 3) {
@@ -203,7 +203,7 @@ public class Server {
 							if (targetUser == null) {
 								out.println(words[1] + " is inactive. Please try later.");
 							} else {
-								out.println(currentUser + ": " + words[2]);
+								targetUser.println(currentUser + ": " + words[2]);
 							}
 						} else {
 							out.println("Invalid send command. Please try again.");
@@ -222,7 +222,7 @@ public class Server {
 							if (targetUser == null) {
 								out.println(words[1] + " is inactive. Please try later.");
 							} else {
-								out.println(words[2]);
+								targetUser.println(words[2]);
 							}
 						} else {
 							out.println("Invalid send command. Please try again.");
@@ -239,34 +239,8 @@ public class Server {
 						out.println("Invalid command. Please try again.");
 					}
 
-					// if (event == null) {
-					// return;
-					// }
-					// synchronized (names) {
-					// if (!names.contains(name)) {
-					// names.add(name);
-					// break;
-					// }
-					// }
 				}
 
-				// Now that a successful name has been chosen, add the
-				// socket's print writer to the set of all writers so
-				// this client can receive broadcast messages.
-				// out.println("NAMEACCEPTED");
-				// writers.add(out);
-
-				// Accept messages from this client and broadcast them.
-				// Ignore other clients that cannot be broadcasted to.
-				// while (true) {
-				// String input = in.readLine();
-				// if (input == null) {
-				// return;
-				// }
-				// for (PrintWriter writer : writers) {
-				// writer.println("MESSAGE " + name + ": " + input);
-				// }
-				// }
 			} catch (IOException e) {
 				System.out.println(e);
 			} finally {
