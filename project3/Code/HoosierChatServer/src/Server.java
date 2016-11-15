@@ -190,6 +190,8 @@ public class Server {
 
 					case "r":
 					case "register":
+						
+						//To-do: check if already online
 
 						if (words.length != 3) {
 							out.println("Invalid Register command, try again");
@@ -218,10 +220,13 @@ public class Server {
 							}
 
 						}
-						break;
+						// newly registered user automatically logs in
+//						break;
 
 					case "l":
 					case "login":
+						
+						// To-do: prevent login on another m/c thru the same uname
 
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
 							if (activeUsers.size() >= 16) {
@@ -265,6 +270,7 @@ public class Server {
 
 					case "s":
 					case "send":
+						// To-do: msg length max 4096 bytes
 						// To-do: msg containing spaces
 						System.out.println("refreshing");
 //						refreshActiveUserList();
@@ -298,6 +304,7 @@ public class Server {
 
 					case "sa":
 					case "senda":
+						// To-do: cannot send private msg to oneself
 //						refreshActiveUserList();
 						System.out.println("refreshed");
 
@@ -338,9 +345,18 @@ public class Server {
 
 						break;
 
+						
+						
+					case "whoami":
+						// To-do
+						break;
+						
+						
 					default:
 						out.println("Invalid command. Please try again.");
 					}
+					
+					
 
 				}
 

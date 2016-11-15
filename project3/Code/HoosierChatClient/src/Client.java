@@ -41,6 +41,8 @@ public class Client {
 	public static void main(String[] args) throws Exception {
 		System.out.println("Hi! Please Register or Login to continue");
 
+		// To-do: server disconnect or no internet --> client gracefully goes down 
+		
 		Scanner cin = new Scanner(System.in);
 		String serverAddress = "10.0.0.7";
 //		String serverAddress = "172.18.25.74";
