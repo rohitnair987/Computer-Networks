@@ -11,6 +11,40 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
+/*class Pinger implements Runnable {
+
+	Socket socket;
+	Map<String, Socket> activeUsers;
+	BufferedReader in;
+	PrintWriter out;
+	String currentUser;
+	
+	public Pinger(Map<String, Socket> activeUsers, String currentUser, Socket socket) throws IOException {
+		this.socket = socket;
+		this.activeUsers = activeUsers;
+		this.currentUser = currentUser;
+		this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		this.out = new PrintWriter(socket.getOutputStream(), true);;
+	}
+
+	public void run() {
+		while (true) {
+			try {
+				socket.getOutputStream().write((byte) '\n');
+				int ch = socket.getInputStream().read();
+				if (ch != '\n') {
+					activeUsers.remove(currentUser);
+					socket.close();
+					return;
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}*/
+
 class Receiver implements Runnable {
 
 	Scanner cin;
@@ -25,7 +59,7 @@ class Receiver implements Runnable {
 		while (true) {
 			try {
 				String line = cin.nextLine();
-				if (line.equalsIgnoreCase("events")) {
+				if (line.equalsIgnoreCase("events") || line.equalsIgnoreCase("e")) {
 					if (events.size() == 0) {
 						System.out.println("\nNo events logged at the server");
 					} else {
@@ -59,7 +93,7 @@ public class Server {
 	 * The set of all the print writers for all the clients. This set is kept so
 	 * we can easily broadcast messages.
 	 */
-	private static Map<String, PrintWriter> activeUsers = new HashMap<String, PrintWriter>();
+	private static Map<String, Socket> activeUsers = new HashMap<>();
 
 	/**
 	 * Events for logging
@@ -76,7 +110,12 @@ public class Server {
 		Thread consoleReader = new Thread(new Receiver(events));
 		consoleReader.start();
 
-		// Thread userPinger = new Thread(new Pinger(events));
+		// check constantly if a user is alive
+		// for (Entry<String, PrintWriter> entry : activeUsers.entrySet()) {
+		// new Thread(new Pinger(activeUsers, entry)).start();
+		// }
+
+		// Thread userPinger = new Thread(new Pinger(activeUsers));
 		// userPinger.start();
 
 		ServerSocket listener = new ServerSocket(PORT);
@@ -105,9 +144,12 @@ public class Server {
 		/**
 		 * Constructs a handler thread, squirreling away the socket. All the
 		 * interesting work is done in the run method.
+		 * 
+		 * @throws IOException
 		 */
-		public Handler(Socket socket) {
+		public Handler(Socket socket) throws IOException {
 			this.socket = socket;
+			// new Thread(new Pinger(activeUsers, currentUser, socket)).start();
 		}
 
 		/**
@@ -129,10 +171,14 @@ public class Server {
 				// must be done while locking the set of names.
 				while (true) {
 					event = in.readLine();
-					System.out.println(event);
+					System.out.println("from " + currentUser + ": " + event);
 					events.add(event);
 
 					if (event == null) {
+						if (!currentUser.isEmpty()) {
+							activeUsers.remove(currentUser);
+						}
+						socket.close();
 						return;
 					}
 
@@ -141,7 +187,8 @@ public class Server {
 					String command = words[0].toLowerCase();
 
 					switch (command) {
-					
+
+					case "r":
 					case "register":
 
 						if (words.length != 3) {
@@ -173,6 +220,7 @@ public class Server {
 						}
 						break;
 
+					case "l":
 					case "login":
 
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
@@ -186,7 +234,7 @@ public class Server {
 									if (pw == null) {
 										out.println("User does not exist. Try again.");
 									} else if (pw.equals(words[2])) {
-										activeUsers.put(words[1], out);
+										activeUsers.put(words[1], socket);
 										currentUser = words[1];
 										out.println("Login success! Start typing ...");
 									} else {
@@ -204,7 +252,6 @@ public class Server {
 
 						break;
 
-						
 					case "logout":
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
 							out.println("You're not logged in");
@@ -216,26 +263,32 @@ public class Server {
 						}
 						break;
 
-						
+					case "s":
 					case "send":
+						// To-do: msg containing spaces
+						System.out.println("refreshing");
+//						refreshActiveUserList();
+						System.out.println("refreshed");
+
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
 							out.println("Please login. Register if you do not have an account");
 						}
 
-						// To-do: refresh
 						else {
 							if (words.length == 2) {
-								for (Entry<String, PrintWriter> targetEntry : activeUsers.entrySet()) {
+								for (Entry<String, Socket> targetEntry : activeUsers.entrySet()) {
 									if (targetEntry.getKey() != currentUser) {
-										targetEntry.getValue().println(currentUser + ": " + words[1]);
+										new PrintWriter(targetEntry.getValue().getOutputStream(), true)
+												.println(currentUser + ": " + words[1]);
 									}
 								}
 							} else if (words.length == 3) {
-								PrintWriter targetUser = activeUsers.get(words[1]);
+								Socket targetUser = activeUsers.get(words[1]);
 								if (targetUser == null) {
 									out.println(words[1] + " is inactive. Please try later.");
 								} else {
-									targetUser.println(currentUser + ": " + words[2]);
+									new PrintWriter(targetUser.getOutputStream(), true)
+											.println(currentUser + ": " + words[2]);
 								}
 							} else {
 								out.println("Invalid send command. Please try again.");
@@ -243,25 +296,33 @@ public class Server {
 						}
 						break;
 
-						
+					case "sa":
 					case "senda":
+//						refreshActiveUserList();
+						System.out.println("refreshed");
+
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
 							out.println("Please login. Register if you do not have an account");
 						}
 
 						else {
 							if (words.length == 2) {
-								for (Entry<String, PrintWriter> targetEntry : activeUsers.entrySet()) {
-									if (targetEntry.getKey() != currentUser) {
-										targetEntry.getValue().println(words[1]);
+								activeUsers.forEach((user, sock) -> {
+									if(user != currentUser) {
+										try {
+											new PrintWriter(sock.getOutputStream(), true).println(words[1]);
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
 									}
-								}
+								});
+								
 							} else if (words.length == 3) {
-								PrintWriter targetUser = activeUsers.get(words[1]);
+								Socket targetUser = activeUsers.get(words[1]);
 								if (targetUser == null) {
 									out.println(words[1] + " is inactive. Please try later.");
 								} else {
-									targetUser.println(words[2]);
+									new PrintWriter(targetUser.getOutputStream(), true).println(words[2]);
 								}
 							} else {
 								out.println("Invalid send command. Please try again.");
@@ -270,12 +331,11 @@ public class Server {
 						break;
 
 					case "list":
-						for (String user : activeUsers.keySet()) {
-							if (isUserOnline(user)) {
+//						refreshActiveUserList();
+						System.out.println("refreshed");
 
-							}
-							out.println(user);
-						}
+						activeUsers.forEach((k, v) -> out.println(k));
+
 						break;
 
 					default:
@@ -299,6 +359,22 @@ public class Server {
 				// socket.close();
 				// } catch (IOException e) {
 				// }
+			}
+		}
+
+		private void refreshActiveUserList() {
+			try {
+				for (Entry<String, Socket> entry : activeUsers.entrySet()) {
+					new PrintWriter(entry.getValue().getOutputStream(), true).write((byte) '\n');
+					int ch = new BufferedReader(new InputStreamReader(entry.getValue().getInputStream())).read();
+					if (ch != '\n') {
+						activeUsers.remove(entry.getKey());
+						entry.getValue().close();
+					}
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 
