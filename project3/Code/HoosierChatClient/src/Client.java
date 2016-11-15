@@ -42,37 +42,22 @@ public class Client {
 		System.out.println("Hi! Please Register or Login to continue");
 
 		Scanner cin = new Scanner(System.in);
-
-		// ask till you get a correct format of input
-		String line = "";
-		int test = 0;
-		while (test++ < 1) {
-			line = cin.nextLine();
-			String words[] = line.split(" ");
-			if (words.length == 3) {
-				break;
-			}
-			System.out.println("Invalid input, try again");
-		}
-
 		String serverAddress = "10.0.0.7";
+//		String serverAddress = "172.18.25.74";
 		Socket socket = new Socket(serverAddress, 9001);
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-		out.println(line);
-
-		Thread receiver = new Thread(new Receiver(in, out));
-		receiver.start();
-
+		new Thread(new Receiver(in, out)).start();
+		
+		String line = "";
+		
 		while (true) {
 			line = cin.nextLine();
 			out.println(line);
 		}
-
-		// cin.close();
-
+		
 	}
 
 }
@@ -91,11 +76,11 @@ class Receiver implements Runnable {
 		while (true) {
 			try {
 				String line = in.readLine();
-				if (line.equals("status")) {
-					out.println("yes");
-				} else {
+//				if (line.equals("status")) {
+//					out.println("yes");
+//				} else {
 					System.out.println(line);
-				}
+//				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
