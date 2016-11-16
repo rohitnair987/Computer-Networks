@@ -115,34 +115,26 @@ public class Client {
 							File fi = new File(words[2]);
 							byte[] fileContent = Files.readAllBytes(fi.toPath());
 
-							for (int i = 0; i < 10; i++) {
-								System.out.print(fileContent[i] + " ");
-							}
-							System.out.println();
+//							for (int i = 0; i < 10; i++) {
+//								System.out.print(fileContent[i] + " ");
+//							}
+//							System.out.println();
 
 							out.println(line + " " + fileContent.length);
 							System.out.println("sending " + fileContent.length + " bytes");
 
-//							DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-//							dOut.write(fileContent);
+							DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+//							dOut.writeInt(fileContent.length); // write length of the message
+							dOut.write(fileContent);           // write the message
+							
 //							dOut.close();
-//							System.exit(0);
-
-							// BufferedImage img = ImageIO.read(new
-							// File("deepika.jpg"));
-							// System.out.println("ht = " + img.getHeight());
-							// out.print("img ");
-							// System.out.println(img);
-
-							// out.print(img);
-							// out.flush();
-							// System.out.println();
 
 							// socket.close();
 						}
 					} else {
 						out.println(line);
 					}
+//					System.exit(0);
 				}
 
 			}
@@ -176,29 +168,32 @@ class Receiver implements Runnable {
 				String line = in.readLine();
 				System.out.println(line);
 
-//				if (line.startsWith("img") || line.startsWith("image")) {
-//					System.out.println("haha");
-//					String words[] = line.split(" ");
-//					if (words.length != 4) {
-//						System.out.println("Invalid");
-//					} else {
-//
-//						int length = Integer.parseInt(words[3]);
-//						System.out.println("data " + length);
-//
-//						// DataInputStream dIn = new
-//						// DataInputStream(socket.getInputStream());
-//						// byte[] fileContent = new byte[length];
-//						// dIn.readFully(fileContent, 0, length);
-//						//
-//						// // To-do: words[2] is the filename
-//						// FileOutputStream fos = new
-//						// FileOutputStream("deeps.jpg");
-//						// fos.write(fileContent);
-//						// fos.close();
-//					}
-//				}
-			} catch (IOException e) {
+				if (line.startsWith("img") || line.startsWith("image")) {
+					System.out.println("haha");
+					
+					String words[] = line.split(" ");
+					
+					if (words.length != 4) {
+						System.out.println("Invalid");
+					} 
+					
+					else {
+
+						int length = Integer.parseInt(words[3]);
+						System.out.println("data " + length);
+
+						DataInputStream dIn = new DataInputStream(socket.getInputStream());
+						byte[] fileContent = new byte[length];
+						dIn.readFully(fileContent, 0, length);
+						System.out.println("received " + fileContent.length + " bytes");
+						
+						// To-do: words[2] is the filename
+						FileOutputStream fos = new FileOutputStream("deeps.jpg");
+						fos.write(fileContent);
+						fos.close();
+					}
+				}
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
