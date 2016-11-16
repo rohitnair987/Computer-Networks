@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
-
 
 class Receiver implements Runnable {
 
@@ -132,101 +132,25 @@ public class Server {
 				// Create character streams for the socket.
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
+				Socket targetUser;
 
 				// Request a name from this client. Keep requesting until
 				// a name is submitted that is not already used. Note that
 				// checking for the existence of a name and adding the name
 				// must be done while locking the set of names.
-//				while (true) 
-				{
-//					int len = Integer.parseInt(in.readLine());
-//					System.out.println(len);
-					
-//					System.out.print(in.read() + " ");
-//					System.out.print(in.read() + " ");
-//					System.out.print(in.read() + " ");
-//					System.out.print(in.read() + " ");
-//					System.out.print(in.read() + " ");
-//					System.out.print(in.read() + " ");
-					
-					DataInputStream dIn = new DataInputStream(socket.getInputStream());
+				while (true) {
+					event = in.readLine();
+					System.out.println("from " + currentUser + ": " + event);
+					events.add(event);
 
-					int length = dIn.readInt();                    // read length of incoming message
-					System.out.println(length);
-					if(length>0) {
-					    byte[] message = new byte[length];
-					    dIn.readFully(message, 0, message.length); // read the message
-					    for (int i = 0 ; i < 10; i++) {
-							System.out.print(message[i] + " ");
+					if (event == null) {
+						if (!currentUser.isEmpty()) {
+							activeUsers.remove(currentUser);
 						}
-					    System.out.println();
-
-						FileOutputStream fos = new FileOutputStream("deeps.jpg");
-						fos.write(message);
-						fos.close();
-//					    System.out.println(message.toString());
+						socket.close();
+						return;
 					}
-					
-					
-					
-//					Thread.sleep(1000);
-					
-//					len = 1;
-//					
-//					byte[] fileContent = new byte[len];
-//					for (int i = 0; i < len; i++) {
-//						fileContent[i] = (byte) in.read();
-//						System.out.println("received: " + fileContent[i]);
-//					}
-//					
-//					System.out.println("asd");
-					
-//					FileOutputStream fos = new FileOutputStream("f.jpg");
-//					byte[] fileContent = in.read(socket.getInputStream())
-//					ObjectInputStream oin = new ObjectInputStream(socket.getInputStream());
-//					System.out.println(oin);
-//                    BufferedImage screenshot = ImageIO.read(oin);
-//					System.out.println(screenshot);
-//                    ImageIO.write(screenshot, "jpg", new File("screenshot.jpg"));
 
-//                    fos.write(fileContent);
-//					fos.close();
-//					InputStreamReader b = new InputStreamReader(socket.getInputStream());
-//					System.out.println(in.readLine());
-//					b.read();
-//					String s = in.readLine();
-//					BufferedImage img = ImageIO.read(b);
-//					BufferedImage img = ImageIO.read(socket.getInputStream());
-//					BufferedImage img = ImageIO.read(s);
-//					System.out.println("yayy");
-//					System.out.println(img);
-//					System.exit(0);
-//					ImageIO.write(img, "jpg", new File("deepika2.jpg"));
-					
-//					event = in.readLine();
-//					System.out.println("from " + currentUser + ": " + event);
-//					events.add(event);
-//					
-//					if (event == null) {
-//						if (!currentUser.isEmpty()) {
-//							activeUsers.remove(currentUser);
-//						}
-//						socket.close();
-//						return;
-//					}
-					
-//					if(event.startsWith("img")) {
-//						System.out.println(event.substring(4));
-//						RenderedImage i = new Render
-//						ImageIO.write(new Render event.substring(4), "jpg", new File("deepika2.jpg"));
-//					}
-					
-					System.exit(0);
-//					if(true)
-//						continue;
-					
-//					if()
-					
 
 					String words[] = event.split(" ");
 
@@ -234,10 +158,54 @@ public class Server {
 
 					switch (command) {
 
+					case "img":
+					case "image":
+
+						// To-do: curr user logged in?
+
+						targetUser = activeUsers.get(words[1]);
+						if (targetUser == null) {
+							out.println(words[1] + " is inactive. Please try later.");
+						} else {
+							new PrintWriter(targetUser.getOutputStream(), true).println(
+									currentUser + " sends you an image: " + words[2] + " of " + words[3] + " bytes");
+
+							int length = Integer.parseInt(words[3]);
+							System.out.println(length);
+
+							// int length = dIn.readInt(); // read length of
+							// incoming message
+							// System.out.println(length);
+
+							// To-do: put some data length limit
+							if (length > 0) {
+
+								// read from curr socket
+//								DataInputStream dIn = new DataInputStream(socket.getInputStream());
+//								byte[] fileContent = new byte[length];
+//								dIn.readFully(fileContent, 0, length);
+
+								// forward to target socket
+//								DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
+//								dOut.write(fileContent); // write the message
+//								dOut.close();
+
+								// for (int i = 0; i < 10; i++) {
+								// System.out.print(fileContent[i] + " ");
+								// }
+								// System.out.println();
+
+							}
+						}
+						
+//						System.exit(0);
+						
+						break;
+
 					case "r":
 					case "register":
-						
-						//To-do: check if already online
+
+						// To-do: check if already online
 
 						if (words.length != 3) {
 							out.println("Invalid Register command, try again");
@@ -267,12 +235,13 @@ public class Server {
 
 						}
 						// newly registered user automatically logs in
-//						break;
+						// break;
 
 					case "l":
 					case "login":
-						
-						// To-do: prevent login on another m/c thru the same uname
+
+						// To-do: prevent login on another m/c thru the same
+						// uname
 
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
 							if (activeUsers.size() >= 16) {
@@ -303,7 +272,6 @@ public class Server {
 
 						break;
 
-						
 					case "lo":
 					case "logout":
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
@@ -316,16 +284,15 @@ public class Server {
 						}
 						break;
 
-						
 					// To-do: 2 different commands:
-						// 1. send user msg with spaces
-						// 2. broadcast msg with spaces
+					// 1. send user msg with spaces
+					// 2. broadcast msg with spaces
 					case "s":
 					case "send":
 						// To-do: msg length max 4096 bytes
 						// To-do: msg containing spaces
 						System.out.println("refreshing");
-//						refreshActiveUserList();
+						// refreshActiveUserList();
 						System.out.println("refreshed");
 
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
@@ -341,7 +308,7 @@ public class Server {
 									}
 								}
 							} else if (words.length == 3) {
-								Socket targetUser = activeUsers.get(words[1]);
+								targetUser = activeUsers.get(words[1]);
 								if (targetUser == null) {
 									out.println(words[1] + " is inactive. Please try later.");
 								} else {
@@ -357,7 +324,7 @@ public class Server {
 					case "sa":
 					case "senda":
 						// To-do: cannot send private msg to oneself
-//						refreshActiveUserList();
+						// refreshActiveUserList();
 						System.out.println("refreshed");
 
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
@@ -367,7 +334,7 @@ public class Server {
 						else {
 							if (words.length == 2) {
 								activeUsers.forEach((user, sock) -> {
-									if(user != currentUser) {
+									if (user != currentUser) {
 										try {
 											new PrintWriter(sock.getOutputStream(), true).println(words[1]);
 										} catch (IOException e) {
@@ -375,9 +342,9 @@ public class Server {
 										}
 									}
 								});
-								
+
 							} else if (words.length == 3) {
-								Socket targetUser = activeUsers.get(words[1]);
+								targetUser = activeUsers.get(words[1]);
 								if (targetUser == null) {
 									out.println(words[1] + " is inactive. Please try later.");
 								} else {
@@ -390,30 +357,24 @@ public class Server {
 						break;
 
 					case "list":
-//						refreshActiveUserList();
+						// refreshActiveUserList();
 						System.out.println("refreshed");
 
 						activeUsers.forEach((k, v) -> out.println(k));
 
 						break;
 
-						
-						
 					case "whoami":
 						// To-do
 						break;
-						
-						
-//					case "img":
-//					case "image":
-//						break;
-						
-						
+
+					// case "img":
+					// case "image":
+					// break;
+
 					default:
 						out.println("Invalid command. Please try again.");
 					}
-					
-					
 
 				}
 
@@ -437,7 +398,7 @@ public class Server {
 
 		private void refreshActiveUserList() {
 			try {
-				
+
 				for (Entry<String, Socket> entry : activeUsers.entrySet()) {
 					new PrintWriter(entry.getValue().getOutputStream(), true).write((byte) '\n');
 					int ch = new BufferedReader(new InputStreamReader(entry.getValue().getInputStream())).read();
