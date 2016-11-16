@@ -1,4 +1,6 @@
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -11,39 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-/*class Pinger implements Runnable {
-
-	Socket socket;
-	Map<String, Socket> activeUsers;
-	BufferedReader in;
-	PrintWriter out;
-	String currentUser;
-	
-	public Pinger(Map<String, Socket> activeUsers, String currentUser, Socket socket) throws IOException {
-		this.socket = socket;
-		this.activeUsers = activeUsers;
-		this.currentUser = currentUser;
-		this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		this.out = new PrintWriter(socket.getOutputStream(), true);;
-	}
-
-	public void run() {
-		while (true) {
-			try {
-				socket.getOutputStream().write((byte) '\n');
-				int ch = socket.getInputStream().read();
-				if (ch != '\n') {
-					activeUsers.remove(currentUser);
-					socket.close();
-					return;
-				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-}*/
 
 class Receiver implements Runnable {
 
@@ -149,7 +118,6 @@ public class Server {
 		 */
 		public Handler(Socket socket) throws IOException {
 			this.socket = socket;
-			// new Thread(new Pinger(activeUsers, currentUser, socket)).start();
 		}
 
 		/**
@@ -169,18 +137,96 @@ public class Server {
 				// a name is submitted that is not already used. Note that
 				// checking for the existence of a name and adding the name
 				// must be done while locking the set of names.
-				while (true) {
-					event = in.readLine();
-					System.out.println("from " + currentUser + ": " + event);
-					events.add(event);
+//				while (true) 
+				{
+//					int len = Integer.parseInt(in.readLine());
+//					System.out.println(len);
+					
+//					System.out.print(in.read() + " ");
+//					System.out.print(in.read() + " ");
+//					System.out.print(in.read() + " ");
+//					System.out.print(in.read() + " ");
+//					System.out.print(in.read() + " ");
+//					System.out.print(in.read() + " ");
+					
+					DataInputStream dIn = new DataInputStream(socket.getInputStream());
 
-					if (event == null) {
-						if (!currentUser.isEmpty()) {
-							activeUsers.remove(currentUser);
+					int length = dIn.readInt();                    // read length of incoming message
+					System.out.println(length);
+					if(length>0) {
+					    byte[] message = new byte[length];
+					    dIn.readFully(message, 0, message.length); // read the message
+					    for (int i = 0 ; i < 10; i++) {
+							System.out.print(message[i] + " ");
 						}
-						socket.close();
-						return;
+					    System.out.println();
+
+						FileOutputStream fos = new FileOutputStream("deeps.jpg");
+						fos.write(message);
+						fos.close();
+//					    System.out.println(message.toString());
 					}
+					
+					
+					
+//					Thread.sleep(1000);
+					
+//					len = 1;
+//					
+//					byte[] fileContent = new byte[len];
+//					for (int i = 0; i < len; i++) {
+//						fileContent[i] = (byte) in.read();
+//						System.out.println("received: " + fileContent[i]);
+//					}
+//					
+//					System.out.println("asd");
+					
+//					FileOutputStream fos = new FileOutputStream("f.jpg");
+//					byte[] fileContent = in.read(socket.getInputStream())
+//					ObjectInputStream oin = new ObjectInputStream(socket.getInputStream());
+//					System.out.println(oin);
+//                    BufferedImage screenshot = ImageIO.read(oin);
+//					System.out.println(screenshot);
+//                    ImageIO.write(screenshot, "jpg", new File("screenshot.jpg"));
+
+//                    fos.write(fileContent);
+//					fos.close();
+//					InputStreamReader b = new InputStreamReader(socket.getInputStream());
+//					System.out.println(in.readLine());
+//					b.read();
+//					String s = in.readLine();
+//					BufferedImage img = ImageIO.read(b);
+//					BufferedImage img = ImageIO.read(socket.getInputStream());
+//					BufferedImage img = ImageIO.read(s);
+//					System.out.println("yayy");
+//					System.out.println(img);
+//					System.exit(0);
+//					ImageIO.write(img, "jpg", new File("deepika2.jpg"));
+					
+//					event = in.readLine();
+//					System.out.println("from " + currentUser + ": " + event);
+//					events.add(event);
+//					
+//					if (event == null) {
+//						if (!currentUser.isEmpty()) {
+//							activeUsers.remove(currentUser);
+//						}
+//						socket.close();
+//						return;
+//					}
+					
+//					if(event.startsWith("img")) {
+//						System.out.println(event.substring(4));
+//						RenderedImage i = new Render
+//						ImageIO.write(new Render event.substring(4), "jpg", new File("deepika2.jpg"));
+//					}
+					
+					System.exit(0);
+//					if(true)
+//						continue;
+					
+//					if()
+					
 
 					String words[] = event.split(" ");
 
@@ -257,6 +303,8 @@ public class Server {
 
 						break;
 
+						
+					case "lo":
 					case "logout":
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
 							out.println("You're not logged in");
@@ -268,6 +316,10 @@ public class Server {
 						}
 						break;
 
+						
+					// To-do: 2 different commands:
+						// 1. send user msg with spaces
+						// 2. broadcast msg with spaces
 					case "s":
 					case "send":
 						// To-do: msg length max 4096 bytes
@@ -352,6 +404,11 @@ public class Server {
 						break;
 						
 						
+//					case "img":
+//					case "image":
+//						break;
+						
+						
 					default:
 						out.println("Invalid command. Please try again.");
 					}
@@ -360,7 +417,7 @@ public class Server {
 
 				}
 
-			} catch (IOException e) {
+			} catch (Exception e) {
 				System.out.println(e);
 			} finally {
 				// This client is going down! Remove its name and its print
@@ -380,6 +437,7 @@ public class Server {
 
 		private void refreshActiveUserList() {
 			try {
+				
 				for (Entry<String, Socket> entry : activeUsers.entrySet()) {
 					new PrintWriter(entry.getValue().getOutputStream(), true).write((byte) '\n');
 					int ch = new BufferedReader(new InputStreamReader(entry.getValue().getInputStream())).read();
