@@ -48,6 +48,9 @@ public class Client {
 	 */
 	public static void main(String[] args) throws Exception {
 
+		// To-do: check .close() et al
+
+		
 		// To-do: server disconnect or no internet --> client gracefully goes
 		// down
 
@@ -59,34 +62,21 @@ public class Client {
 			serverAddress = args[0];
 		}
 
-		// serverAddress = "10.0.0.7";
-		// serverAddress = "172.18.25.74";
 
 		System.out.println(serverAddress);
 
+		// To-do: remove this
 		if ("127.0.0.1".equals(serverAddress)) {
 			System.out.println("Offline local chat");
 		}
 
 		try {
-			System.out.println("trying");
 			Socket socket = new Socket();
 			// socket.setSoTimeout(5000);
 			socket.connect(new InetSocketAddress(serverAddress, 9001), 1000);
 
-			// Socket socket = new Socket(serverAddress, 9001);
-			System.out.println("connected jus now");
-			// boolean res = socket.getInetAddress().isReachable(1000);
-			// if(res) {
-			// if (socket.getInputStream().read() != -1) {
-			// System.out.println("yes");
-			// } else {
-			// System.out.println("no");
-			// }
-
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-			// out.println("test msg to server");
 
 			// Test the connection
 			if (!socket.isConnected()) {
@@ -103,38 +93,37 @@ public class Client {
 					// ignore case
 					// remove to lower at server
 					line = cin.nextLine().toLowerCase();
-					// if(false) {
-					if (line.startsWith("img") || line.startsWith("image")) {
-						String words[] = line.split(" ");
-						if (words.length != 3) {
-							System.out.println("Invalid " + words[0] + " command.");
-						} else {
+					out.println(line);
 
-							words[2] = "deepika.jpg";
-							// To-do: check if file exists
-							File fi = new File(words[2]);
-							byte[] fileContent = Files.readAllBytes(fi.toPath());
-
-//							for (int i = 0; i < 10; i++) {
-//								System.out.print(fileContent[i] + " ");
-//							}
-//							System.out.println();
-
-							out.println(line + " " + fileContent.length);
-							System.out.println("sending " + fileContent.length + " bytes");
-
-							DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-//							dOut.writeInt(fileContent.length); // write length of the message
-							dOut.write(fileContent);           // write the message
-							
-//							dOut.close();
-
-							// socket.close();
-						}
-					} else {
-						out.println(line);
-					}
-//					System.exit(0);
+//					if (line.startsWith("img") || line.startsWith("image")) {
+//						String words[] = line.split(" ");
+//						if (words.length != 3) {
+//							System.out.println("Invalid " + words[0] + " command.");
+//						} else {
+//
+//							words[2] = "deepika.jpg";
+//							// To-do: check if file exists
+//							File fi = new File(words[2]);
+//							byte[] fileContent = Files.readAllBytes(fi.toPath());
+//
+////							for (int i = 0; i < 10; i++) {
+////								System.out.print(fileContent[i] + " ");
+////							}
+////							System.out.println();
+//
+//							out.println(line + " " + fileContent.length);
+//							System.out.println("sending " + fileContent.length + " bytes");
+//
+//							DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+//							dOut.write(fileContent);           // write the message
+//							
+////							dOut.close();
+//
+//							// socket.close();
+//						}
+//					} else {
+//						out.println(line);
+//					}
 				}
 
 			}
@@ -168,30 +157,56 @@ class Receiver implements Runnable {
 				String line = in.readLine();
 				System.out.println(line);
 
-				if (line.startsWith("img") || line.startsWith("image")) {
-					System.out.println("haha");
+//				if line starts with sendimg or imgdata --> efficiency
+				
+				String words[] = line.split(" ");
+				
+				if (words[0].equals("sendImg")) {
+					System.out.println("sendImg method");
+					words[2] = "deepika.jpg";
 					
-					String words[] = line.split(" ");
+					String imgName = words[2];
+					String targetUserName = words[1];
 					
-					if (words.length != 4) {
-						System.out.println("Invalid");
-					} 
-					
-					else {
+//					// To-do: check if file exists
+					File fi = new File(imgName);
+					byte[] fileContent = Files.readAllBytes(fi.toPath());
 
-						int length = Integer.parseInt(words[3]);
-						System.out.println("data " + length);
+//					for (int i = 0; i < 10; i++) {
+//						System.out.print(fileContent[i] + " ");
+//					}
+//					System.out.println();
 
-						DataInputStream dIn = new DataInputStream(socket.getInputStream());
-						byte[] fileContent = new byte[length];
-						dIn.readFully(fileContent, 0, length);
-						System.out.println("received " + fileContent.length + " bytes");
-						
-						// To-do: words[2] is the filename
-						FileOutputStream fos = new FileOutputStream("deeps.jpg");
-						fos.write(fileContent);
-						fos.close();
-					}
+					System.out.println("sending " + fileContent.length + " bytes");
+					
+					out.println("imgData " + targetUserName + " " + imgName + " " + fileContent.length);
+					
+					DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+					dOut.write(fileContent);
+					
+//					dOut.close();
+					
+				}
+
+				if (words[0].equals("imgData")) {
+					System.out.println("imgData method");
+					
+					String sourceUserName = words[1];
+					String imgName = words[2];
+					int length = Integer.parseInt(words[3]);
+					System.out.println("data length " + length);
+
+					DataInputStream dIn = new DataInputStream(socket.getInputStream());
+					byte[] fileContent = new byte[length];
+					dIn.readFully(fileContent, 0, length);
+					
+					// To-do: imgName
+					FileOutputStream fos = new FileOutputStream("deeps.jpg");
+					fos.write(fileContent);
+					fos.close();
+					
+					System.out.println("Received " + imgName + " from " + sourceUserName);
+					
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

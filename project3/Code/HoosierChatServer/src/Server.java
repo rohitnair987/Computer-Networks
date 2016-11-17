@@ -129,6 +129,8 @@ public class Server {
 		public void run() {
 			try {
 
+				// To-do: check .close() et al
+
 				// Create character streams for the socket.
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
@@ -141,108 +143,115 @@ public class Server {
 				while (true) {
 					event = in.readLine();
 					System.out.println("from " + currentUser + ": " + event);
-					events.add(event);
 
 					if (event == null) {
 						if (!currentUser.isEmpty()) {
 							System.out.println(currentUser + " disconnected");
 							activeUsers.remove(currentUser);
+							events.add(currentUser + " disconnected");
+						} else {
+							events.add("User disconnected");
 						}
 						socket.close();
 						return;
+					} else {
+						events.add(event);
 					}
 
 					String words[] = event.split(" ");
-
-					String command = words[0].toLowerCase();
+					// tolower done at client side already
+					String command = words[0];
 
 					switch (command) {
 
+					case "i":
 					case "img":
 					case "image":
 
-						// To-do: if no one logged in, it gives an error
-						targetUser = activeUsers.get(words[1]);
-						if (targetUser == null) {
-							out.println(words[1] + " is inactive. Please try later.");
-						} else {
-							PrintWriter targetOut = new PrintWriter(targetUser.getOutputStream(), true);
-							targetOut.println(
-									currentUser + " sends you an image: " + words[2] + " of " + words[3] + " bytes");
+						// To-do: if no one's logged in, it gives an error
 
+						// User logged in?
+						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
+							out.println("Please login to send an image");
+						}
+
+						else {
 							
-							DataInputStream dIn = new DataInputStream(socket.getInputStream());
+							if (words.length != 3) {
+								out.println("Invalid " + command + " command.");
+							} 
+							else {
+								String targetUserName = words[1];
 
-							int length = Integer.parseInt(words[3]);
-							System.out.println(length);
-
-							if (length > 0) {
-								// read from curr socket
-								byte[] fileContent = new byte[length];
-								dIn.readFully(fileContent, 0, length); // read
-																		// the
-																		// message
-
-								// sample syso
-								for (int i = 0; i < 10; i++) {
-									System.out.print(fileContent[i] + " ");
+								// Current user logged in?
+								if (currentUser.equals(targetUserName)) {
+									out.println("Can't send an image to yourself");
 								}
-								System.out.println();
 
-								// To-do: store at server?
-								// write img - test
-								FileOutputStream fos = new FileOutputStream("deeps.jpg");
-								fos.write(fileContent);
-								fos.close();
-
-								// forward to target socket
-								targetOut.println(event);
-								DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
-								dOut.write(fileContent); // write the message
-								// dOut.close();
-
+								else {
+									targetUser = activeUsers.get(targetUserName);
+									
+									if (targetUser == null) {
+										out.println(targetUserName + " is inactive. Please try later.");
+									}
+									
+									else {
+										String imgName = words[2];
+										out.println("sendImg " + targetUserName + " " + imgName);
+									}
+								}
 							}
 						}
-						// System.exit(0);
+						
+						break;
+							
+							
+						
+					case "imgData":
+						
+						String targetUserName = words[1];
+						String imgName = words[2];
+						int length = Integer.parseInt(words[3]);
+						targetUser = activeUsers.get(targetUserName);
+						
+						System.out.println(length);
+						
+						PrintWriter targetOut = new PrintWriter(targetUser.getOutputStream(), true);
 
-						// To-do: curr user logged in?
+						
+						// Reading the image
+						DataInputStream dIn = new DataInputStream(socket.getInputStream());
 
-						targetUser = activeUsers.get(words[1]);
-						if (targetUser == null) {
-							// out.println(words[1] + " is inactive. Please try
-							// later.");
-						} else {
-							// new PrintWriter(targetUser.getOutputStream(),
-							// true).println(
-							// currentUser + " sends you an image: " + words[2]
-							// + " of " + words[3] + " bytes");
+						if (length > 0) {
+							// read from current socket
+							byte[] fileContent = new byte[length];
+							dIn.readFully(fileContent, 0, length);
 
-							// DataInputStream dIn = new
-							// DataInputStream(socket.getInputStream());
-							//
+							// To-do: sample syso - remove
+							for (int i = 0; i < 10; i++) {
+								System.out.print(fileContent[i] + " ");
+							}
+							System.out.println();
 
-							// if (length > 0) {
-							//
-							// // read from curr socket
-							// byte[] fileContent = new byte[length];
-							// dIn.readFully(fileContent, 0, length);
-							//
-							// System.out.println("received");
-							//
-							// // forward to target socket
-							//// DataOutputStream dOut = new
-							// DataOutputStream(targetUser.getOutputStream());
-							//// dOut.write(fileContent); // write the message
-							//// dOut.close();
-							//
-							// // for (int i = 0; i < 10; i++) {
-							// // System.out.print(fileContent[i] + " ");
-							// // }
-							// // System.out.println();
-							//
-							// }
+							// To-do: store at server?
+							// write img - test
+							FileOutputStream fos = new FileOutputStream("deeps.jpg");
+							fos.write(fileContent);
+							fos.close();
+
+							
+							// do in client
+//							targetOut.println(currentUser + " sends you an image " + imgName + " of "
+//									+ length + " bytes");
+							
+							// forward to target socket
+							targetOut.println("imgData " + currentUser + " " + imgName + " " + length);
+							DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
+							dOut.write(fileContent);
+							// dOut.close();
+						
+							
 						}
-
 						// System.exit(0);
 
 						break;
@@ -257,17 +266,17 @@ public class Server {
 						}
 
 						else {
-//							String res = checkString(words[1]);
-//							if (!res.equals("Yes")) {
-//								out.println(res);
-//								break;
-//							}
-//
-//							res = checkString(words[2]);
-//							if (!res.equals("Yes")) {
-//								out.println(res);
-//								break;
-//							}
+							// String res = checkString(words[1]);
+							// if (!res.equals("Yes")) {
+							// out.println(res);
+							// break;
+							// }
+							//
+							// res = checkString(words[2]);
+							// if (!res.equals("Yes")) {
+							// out.println(res);
+							// break;
+							// }
 
 							if (!names.containsKey(words[1])) {
 								names.put(words[1], words[2]);
