@@ -90,44 +90,14 @@ public class Client {
 
 				String line = "";
 				while (true) {
-					// ignore case
-					// remove to lower at server
 					line = cin.nextLine().toLowerCase();
 					out.println(line);
-
-//					if (line.startsWith("img") || line.startsWith("image")) {
-//						String words[] = line.split(" ");
-//						if (words.length != 3) {
-//							System.out.println("Invalid " + words[0] + " command.");
-//						} else {
-//
-//							words[2] = "deepika.jpg";
-//							// To-do: check if file exists
-//							File fi = new File(words[2]);
-//							byte[] fileContent = Files.readAllBytes(fi.toPath());
-//
-////							for (int i = 0; i < 10; i++) {
-////								System.out.print(fileContent[i] + " ");
-////							}
-////							System.out.println();
-//
-//							out.println(line + " " + fileContent.length);
-//							System.out.println("sending " + fileContent.length + " bytes");
-//
-//							DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-//							dOut.write(fileContent);           // write the message
-//							
-////							dOut.close();
-//
-//							// socket.close();
-//						}
-//					} else {
-//						out.println(line);
-//					}
 				}
 
 			}
-		} catch (SocketException se) {
+		} 
+		
+		catch (SocketException se) {
 			System.out.println("Network is unreachable. Please try again later.");
 		}
 
@@ -201,15 +171,21 @@ class Receiver implements Runnable {
 					dIn.readFully(fileContent, 0, length);
 					
 					// To-do: imgName
-					FileOutputStream fos = new FileOutputStream("deeps.jpg");
+					FileOutputStream fos = new FileOutputStream(imgName);
 					fos.write(fileContent);
 					fos.close();
 					
 					System.out.println("Received " + imgName + " from " + sourceUserName);
 					
 				}
-			} catch (Exception e) {
+			} 
+			catch(NullPointerException npe) {
+				System.out.println("Disconnected from server. Please try again later");
+				System.exit(1);
+			}
+			catch (Exception e) {
 				e.printStackTrace();
+				System.exit(1);
 			}
 		}
 	}

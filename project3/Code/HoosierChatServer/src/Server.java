@@ -134,7 +134,7 @@ public class Server {
 				// Create character streams for the socket.
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
-				Socket targetUser;
+				Socket targetUser = null;
 
 				// Request a name from this client. Keep requesting until
 				// a name is submitted that is not already used. Note that
@@ -142,33 +142,37 @@ public class Server {
 				// must be done while locking the set of names.
 				while (true) {
 					event = in.readLine();
-					System.out.println("from " + currentUser + ": " + event);
+					System.out.println(currentUser + ": " + event);
 
+					// Remove the client from the active list when disconnected
+					// and log it
 					if (event == null) {
 						if (!currentUser.isEmpty()) {
 							System.out.println(currentUser + " disconnected");
 							activeUsers.remove(currentUser);
 							events.add(currentUser + " disconnected");
-						} else {
+						}
+
+						else {
 							events.add("User disconnected");
 						}
+
 						socket.close();
 						return;
-					} else {
+					}
+
+					else {
 						events.add(event);
 					}
 
 					String words[] = event.split(" ");
-					// tolower done at client side already
 					String command = words[0];
+					String targetUserName = "";
 
 					switch (command) {
 
-					case "i":
 					case "img":
 					case "image":
-
-						// To-do: if no one's logged in, it gives an error
 
 						// User logged in?
 						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
@@ -176,12 +180,11 @@ public class Server {
 						}
 
 						else {
-							
+
 							if (words.length != 3) {
 								out.println("Invalid " + command + " command.");
-							} 
-							else {
-								String targetUserName = words[1];
+							} else {
+								targetUserName = words[1];
 
 								// Current user logged in?
 								if (currentUser.equals(targetUserName)) {
@@ -190,11 +193,13 @@ public class Server {
 
 								else {
 									targetUser = activeUsers.get(targetUserName);
-									
+
 									if (targetUser == null) {
 										out.println(targetUserName + " is inactive. Please try later.");
 									}
-									
+
+									// Indicate to the client that the command
+									// is correct
 									else {
 										String imgName = words[2];
 										out.println("sendImg " + targetUserName + " " + imgName);
@@ -202,23 +207,18 @@ public class Server {
 								}
 							}
 						}
-						
+
 						break;
-							
-							
-						
+
 					case "imgData":
-						
-						String targetUserName = words[1];
+
+						targetUserName = words[1];
 						String imgName = words[2];
 						int length = Integer.parseInt(words[3]);
 						targetUser = activeUsers.get(targetUserName);
-						
-						System.out.println(length);
-						
+
 						PrintWriter targetOut = new PrintWriter(targetUser.getOutputStream(), true);
 
-						
 						// Reading the image
 						DataInputStream dIn = new DataInputStream(socket.getInputStream());
 
@@ -227,32 +227,11 @@ public class Server {
 							byte[] fileContent = new byte[length];
 							dIn.readFully(fileContent, 0, length);
 
-							// To-do: sample syso - remove
-							for (int i = 0; i < 10; i++) {
-								System.out.print(fileContent[i] + " ");
-							}
-							System.out.println();
-
-							// To-do: store at server?
-							// write img - test
-							FileOutputStream fos = new FileOutputStream("deeps.jpg");
-							fos.write(fileContent);
-							fos.close();
-
-							
-							// do in client
-//							targetOut.println(currentUser + " sends you an image " + imgName + " of "
-//									+ length + " bytes");
-							
 							// forward to target socket
 							targetOut.println("imgData " + currentUser + " " + imgName + " " + length);
 							DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
 							dOut.write(fileContent);
-							// dOut.close();
-						
-							
 						}
-						// System.exit(0);
 
 						break;
 
@@ -260,171 +239,216 @@ public class Server {
 					case "register":
 
 						// To-do: check if already online
-
-						if (words.length != 3) {
-							out.println("Invalid Register command, try again");
+						if (!currentUser.isEmpty()) {
+							out.println("Logout to register a new user");
 						}
 
 						else {
-							// String res = checkString(words[1]);
-							// if (!res.equals("Yes")) {
-							// out.println(res);
-							// break;
-							// }
-							//
-							// res = checkString(words[2]);
-							// if (!res.equals("Yes")) {
-							// out.println(res);
-							// break;
-							// }
 
-							if (!names.containsKey(words[1])) {
-								names.put(words[1], words[2]);
-								out.println("Registration successful. Welcome to Hoosier Chat " + words[1] + " !!");
+							if (words.length != 3) {
+								out.println("Invalid Register command, try again");
 							}
 
 							else {
-								out.println("This user already exists, please try another one");
-							}
+								String userName = words[1];
+								String password = words[2];
 
+								// String res = checkString(userName);
+								// if (!res.equals("Yes")) {
+								// out.println(res);
+								// break;
+								// }
+								//
+								// res = checkString(password);
+								// if (!res.equals("Yes")) {
+								// out.println(res);
+								// break;
+								// }
+
+								if (!names.containsKey(userName)) {
+									names.put(userName, password);
+									out.println("Registration successful. Welcome to Hoosier Chat " + userName + " !!");
+								}
+
+								else {
+									out.println("This user already exists, please try another one");
+								}
+
+							}
 						}
-						// newly registered user automatically logs in
-						// break;
+
+						break;
 
 					case "l":
 					case "login":
 
-						// To-do: prevent login on another m/c thru the same
-						// uname
+						if (words.length != 3) {
+							out.println("Invalid Login command, try again");
+						} else {
+							String userName = words[1];
+							String password = words[2];
 
-						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
-							if (activeUsers.size() >= 16) {
-								out.println("Server full. Please come back later");
-							} else {
-								if (words.length != 3) {
-									out.println("Invalid Login command, try again");
-								} else {
-									String pw = names.get(words[1]);
-									if (pw == null) {
-										out.println("User does not exist. Try again.");
-									} else if (pw.equals(words[2])) {
-										activeUsers.put(words[1], socket);
-										currentUser = words[1];
-										out.println("Login success! Start typing ...");
-									} else {
-										out.println("Wrong password. Try again.");
-									}
-								}
-
+							// Client online?
+							if (!currentUser.isEmpty()) {
+								out.println("You're online as " + currentUser);
 							}
 
-						}
+							else {
 
-						else {
-							out.println("You're already logged in as " + currentUser);
+								String pw = names.get(userName);
+								if (pw == null) {
+									out.println("User does not exist. Try again.");
+								} else {
+
+									if (!pw.equals(password)) {
+										out.println("Wrong password! Try again.");
+									} else {
+										
+										if (activeUsers.size() >= 16) {
+											out.println("Server full. Please come back later");
+										}
+										else {
+											/*
+											 * Override login on another machine
+											 * through the same user name
+											 */
+											if (activeUsers.containsKey(userName)) {
+												out.println("Logging you out of the other instance you've logged in");
+												activeUsers.get(userName).close();
+												activeUsers.remove(userName);
+											} 
+												
+											activeUsers.put(userName, socket);
+											currentUser = userName;
+											out.println("Login successful! Start typing ...");
+											
+										}
+
+										
+											
+										 
+									}
+
+								}
+							}
 						}
 
 						break;
 
 					case "lo":
 					case "logout":
-						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
+
+						if (currentUser.isEmpty()) {
 							out.println("You're not logged in");
 						}
 
 						else {
-							out.println("See ya!");
 							activeUsers.remove(currentUser);
+							currentUser = "";
+							out.println("See ya!");
 						}
+
 						break;
 
-					// To-do: 2 different commands:
-					// 1. send user msg with spaces
-					// 2. broadcast msg with spaces
+					// To-do: msg length max 4096 bytes
+					case "b":
+					case "broadcast":
+					case "ba":
+					case "broadcasta":
 					case "s":
 					case "send":
-						// To-do: msg length max 4096 bytes
-						// To-do: msg containing spaces
-						System.out.println("refreshing");
-						// refreshActiveUserList();
-						System.out.println("refreshed");
-
-						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
-							out.println("Please login. Register if you do not have an account");
-						}
-
-						else {
-							if (words.length == 2) {
-								for (Entry<String, Socket> targetEntry : activeUsers.entrySet()) {
-									if (targetEntry.getKey() != currentUser) {
-										new PrintWriter(targetEntry.getValue().getOutputStream(), true)
-												.println(currentUser + ": " + words[1]);
-									}
-								}
-							} else if (words.length == 3) {
-								targetUser = activeUsers.get(words[1]);
-								if (targetUser == null) {
-									out.println(words[1] + " is inactive. Please try later.");
-								} else {
-									new PrintWriter(targetUser.getOutputStream(), true)
-											.println(currentUser + ": " + words[2]);
-								}
-							} else {
-								out.println("Invalid send command. Please try again.");
-							}
-						}
-						break;
-
 					case "sa":
 					case "senda":
-						// To-do: cannot send private msg to oneself
-						// refreshActiveUserList();
-						System.out.println("refreshed");
 
-						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
-							out.println("Please login. Register if you do not have an account");
+						if (currentUser.isEmpty()) {
+							out.println("Please login to send messages. Register if you do not have an account");
 						}
 
 						else {
-							if (words.length == 2) {
-								activeUsers.forEach((user, sock) -> {
-									if (user != currentUser) {
-										try {
-											new PrintWriter(sock.getOutputStream(), true).println(words[1]);
-										} catch (IOException e) {
-											e.printStackTrace();
+							if (words.length < 2) {
+								out.println("Invalid " + command + " command. Please try again.");
+							}
+
+							else {
+
+								StringBuffer msg = new StringBuffer();
+								Socket targetSocket = null;
+
+								if (command.startsWith("s")) {
+									if (words.length < 3) {
+										out.println("Invalid " + command + " command. Please try again.");
+										break;
+									}
+									targetUserName = words[1];
+									targetSocket = activeUsers.get(targetUserName);
+
+									if (targetSocket == null) {
+										out.println(targetUserName + " is inactive. Please try later.");
+										break;
+									}
+									msg.append(event.substring(command.length() + targetUserName.length() + 2));
+								} else {
+									msg.append(event.substring(command.length() + 1));
+								}
+
+								if (!command.endsWith("a")) {
+									msg.insert(0, currentUser + ": ");
+								}
+
+								if (msg.length() > 4096) {
+									out.println("Your message is too long");
+								}
+
+								else {
+
+									// Broadcast the msg
+									if (command.startsWith("b")) {
+										for (Entry<String, Socket> targetEntry : activeUsers.entrySet()) {
+											if (targetEntry.getKey() != currentUser) {
+												new PrintWriter(targetEntry.getValue().getOutputStream(), true)
+														.println(msg);
+											}
 										}
 									}
-								});
 
-							} else if (words.length == 3) {
-								targetUser = activeUsers.get(words[1]);
-								if (targetUser == null) {
-									out.println(words[1] + " is inactive. Please try later.");
-								} else {
-									new PrintWriter(targetUser.getOutputStream(), true).println(words[2]);
+									// Send a one-to-one msg
+									else {
+										new PrintWriter(targetUser.getOutputStream(), true).println(msg);
+									}
 								}
-							} else {
-								out.println("Invalid send command. Please try again.");
 							}
+
 						}
+
 						break;
 
 					case "list":
-						// refreshActiveUserList();
-						System.out.println("refreshed");
-
 						activeUsers.forEach((k, v) -> out.println(k));
-
 						break;
 
 					case "whoami":
-						// To-do
+						out.println(!currentUser.isEmpty() ? currentUser : "You're not logged in");
 						break;
 
-					// case "img":
-					// case "image":
-					// break;
+					case "isonline":
+						if (words.length < 2) {
+							out.println("Please enter username after the command");
+						} else {
+							if (!names.containsKey(words[1])) {
+								out.println("This user does not exist");
+							} else {
+								out.println(activeUsers.containsKey(words[1]) ? "Yes" : "No");
+							}
+						}
+						break;
+
+					case "exists":
+						if (words.length < 2) {
+							out.println("Please enter username after the command");
+						} else {
+							out.println(names.containsKey(words[1]) ? "Yes" : "No");
+						}
+						break;
 
 					default:
 						out.println("Invalid command. Please try again.");
@@ -432,22 +456,12 @@ public class Server {
 
 				}
 
-			} catch (Exception e) {
-				System.out.println(e);
-			} finally {
-				// This client is going down! Remove its name and its print
-				// writer from the sets, and close its socket.
-				// if (name != null) {
-				// names.remove(name);
-				// }
-				// if (out != null) {
-				// writers.remove(out);
-				// }
-				// try {
-				// socket.close();
-				// } catch (IOException e) {
-				// }
 			}
+
+			catch (Exception e) {
+				System.out.println(e);
+			}
+
 		}
 
 		private void refreshActiveUserList() {
@@ -479,18 +493,12 @@ public class Server {
 			return "Only alphanumerics are allowed";
 		}
 
-		private boolean isUserLoggedIn(String user) {
-			for (String activeUser : activeUsers.keySet()) {
-				if (user.equals(activeUser)) {
-					return true;
-				}
+		private boolean isUserLoggedIn(String userName) {
+			if (activeUsers.containsKey(userName)) {
+				return true;
 			}
 			return false;
 		}
 
-		private boolean isUserOnline(String user) {
-
-			return false;
-		}
 	}
 }
