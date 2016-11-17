@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
+
+/**
+ * Listener at the server's standard input
+ */
 class Receiver implements Runnable {
 
 	Scanner cin;
@@ -41,6 +45,9 @@ class Receiver implements Runnable {
 					}
 					System.out.println();
 				}
+				else {
+					System.out.println("Invalid command");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -49,23 +56,30 @@ class Receiver implements Runnable {
 }
 
 public class Server {
-
+	
+	/**
+	 * Port number at which the server process listens to
+	 * Clients need this port number to contact the server
+	 */
 	private static final int PORT = 9001;
+	private static final int MAX_NUMBER_OF_CLIENTS = 16;
+	private static final int MAX_MESSAGE_LENGTH = 4096;
 
 	/**
-	 * The set of all names of clients in the chat room. Maintained so that we
-	 * can check that new clients are not registering name already in use.
+	 * Stores the user-names and passwords of all clients in the system
+	 * Can be stored in secondary storage for persistence
 	 */
 	private static Map<String, String> names = new HashMap<String, String>();
 
 	/**
-	 * The set of all the print writers for all the clients. This set is kept so
-	 * we can easily broadcast messages.
+	 * Users who are logged in, mapped to the corresponding socket
 	 */
 	private static Map<String, Socket> activeUsers = new HashMap<>();
 
 	/**
-	 * Events for logging
+	 * Events for logging at server
+	 * Can be stored in secondary storage for persistence
+	 * Invoked by the command 'events' at the server
 	 */
 	private static List<String> events = new ArrayList<>();
 
@@ -79,14 +93,6 @@ public class Server {
 		Thread consoleReader = new Thread(new Receiver(events));
 		consoleReader.start();
 
-		// check constantly if a user is alive
-		// for (Entry<String, PrintWriter> entry : activeUsers.entrySet()) {
-		// new Thread(new Pinger(activeUsers, entry)).start();
-		// }
-
-		// Thread userPinger = new Thread(new Pinger(activeUsers));
-		// userPinger.start();
-
 		ServerSocket listener = new ServerSocket(PORT);
 		try {
 			while (true) {
@@ -99,9 +105,7 @@ public class Server {
 	}
 
 	/**
-	 * A handler thread class. Handlers are spawned from the listening loop and
-	 * are responsible for a dealing with a single client and broadcasting its
-	 * messages.
+	 * A thread per client to handle it's requests
 	 */
 	private static class Handler extends Thread {
 		private String event;
@@ -110,42 +114,29 @@ public class Server {
 		private PrintWriter out;
 		private String currentUser = "";
 
-		/**
-		 * Constructs a handler thread, squirreling away the socket. All the
-		 * interesting work is done in the run method.
-		 * 
-		 * @throws IOException
-		 */
 		public Handler(Socket socket) throws IOException {
 			this.socket = socket;
 		}
 
-		/**
-		 * Services this thread's client by repeatedly requesting a screen name
-		 * until a unique one has been submitted, then acknowledges the name and
-		 * registers the output stream for the client in a global set, then
-		 * repeatedly gets inputs and broadcasts them.
-		 */
+
 		public void run() {
 			try {
 
 				// To-do: check .close() et al
 
-				// Create character streams for the socket.
+				// Input and output streams for each client's socket.
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
 				Socket targetUser = null;
 
-				// Request a name from this client. Keep requesting until
-				// a name is submitted that is not already used. Note that
-				// checking for the existence of a name and adding the name
-				// must be done while locking the set of names.
+				/**
+				 * Listens to the client, validated the requests and services them
+				 * Sends corresponding error messages to clients 
+				 */
 				while (true) {
 					event = in.readLine();
 					System.out.println(currentUser + ": " + event);
 
-					// Remove the client from the active list when disconnected
-					// and log it
 					if (event == null) {
 						if (!currentUser.isEmpty()) {
 							System.out.println(currentUser + " disconnected");
@@ -171,11 +162,14 @@ public class Server {
 
 					switch (command) {
 
+					/**
+					 * The original client request for sending an image to another client
+					 */
 					case "img":
 					case "image":
 
-						// User logged in?
-						if (currentUser.isEmpty() || !isUserLoggedIn(currentUser)) {
+						// User has to be online to send an image
+						if (currentUser.isEmpty() || !activeUsers.containsKey(currentUser)) {
 							out.println("Please login to send an image");
 						}
 
@@ -186,7 +180,7 @@ public class Server {
 							} else {
 								targetUserName = words[1];
 
-								// Current user logged in?
+								// We do not allow sending images to oneself
 								if (currentUser.equals(targetUserName)) {
 									out.println("Can't send an image to yourself");
 								}
@@ -198,8 +192,10 @@ public class Server {
 										out.println(targetUserName + " is inactive. Please try later.");
 									}
 
-									// Indicate to the client that the command
-									// is correct
+									/*
+									 * Tells the user that command is correct
+									 * Provides information required to send the image
+									 */
 									else {
 										String imgName = words[2];
 										out.println("sendImg " + targetUserName + " " + imgName);
@@ -210,6 +206,11 @@ public class Server {
 
 						break;
 
+					/*
+					 * Inputs the image data
+					 * Provides information required to receive the image
+					 * Outputs the image
+					 */
 					case "imgData":
 
 						targetUserName = words[1];
@@ -219,15 +220,14 @@ public class Server {
 
 						PrintWriter targetOut = new PrintWriter(targetUser.getOutputStream(), true);
 
-						// Reading the image
 						DataInputStream dIn = new DataInputStream(socket.getInputStream());
 
 						if (length > 0) {
-							// read from current socket
+							// Read the image from the current socket
 							byte[] fileContent = new byte[length];
 							dIn.readFully(fileContent, 0, length);
 
-							// forward to target socket
+							// Forward the image to target socket
 							targetOut.println("imgData " + currentUser + " " + imgName + " " + length);
 							DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
 							dOut.write(fileContent);
@@ -238,7 +238,7 @@ public class Server {
 					case "r":
 					case "register":
 
-						// To-do: check if already online
+						// Logged in users cannot register
 						if (!currentUser.isEmpty()) {
 							out.println("Logout to register a new user");
 						}
@@ -253,6 +253,7 @@ public class Server {
 								String userName = words[1];
 								String password = words[2];
 
+								// Checks the length and alphanumeric conformity
 								// String res = checkString(userName);
 								// if (!res.equals("Yes")) {
 								// out.println(res);
@@ -288,7 +289,7 @@ public class Server {
 							String userName = words[1];
 							String password = words[2];
 
-							// Client online?
+							// User is already online
 							if (!currentUser.isEmpty()) {
 								out.println("You're online as " + currentUser);
 							}
@@ -304,7 +305,7 @@ public class Server {
 										out.println("Wrong password! Try again.");
 									} else {
 										
-										if (activeUsers.size() >= 16) {
+										if (activeUsers.size() >= MAX_NUMBER_OF_CLIENTS) {
 											out.println("Server full. Please come back later");
 										}
 										else {
@@ -323,9 +324,6 @@ public class Server {
 											out.println("Login successful! Start typing ...");
 											
 										}
-
-										
-											
 										 
 									}
 
@@ -350,7 +348,6 @@ public class Server {
 
 						break;
 
-					// To-do: msg length max 4096 bytes
 					case "b":
 					case "broadcast":
 					case "ba":
@@ -395,13 +392,13 @@ public class Server {
 									msg.insert(0, currentUser + ": ");
 								}
 
-								if (msg.length() > 4096) {
+								if (msg.length() > MAX_MESSAGE_LENGTH) {
 									out.println("Your message is too long");
 								}
 
 								else {
 
-									// Broadcast the msg
+									// Broadcast the message to all online users
 									if (command.startsWith("b")) {
 										for (Entry<String, Socket> targetEntry : activeUsers.entrySet()) {
 											if (targetEntry.getKey() != currentUser) {
@@ -411,7 +408,7 @@ public class Server {
 										}
 									}
 
-									// Send a one-to-one msg
+									// Send a one-to-one message to the designated user
 									else {
 										new PrintWriter(targetUser.getOutputStream(), true).println(msg);
 									}
@@ -422,14 +419,24 @@ public class Server {
 
 						break;
 
+						
+					/**
+					 * Lists all the users who are online in the system
+					 */
 					case "list":
 						activeUsers.forEach((k, v) -> out.println(k));
 						break;
 
+					/**
+					 * Gets the user-name of the user that sends this request
+					 */
 					case "whoami":
 						out.println(!currentUser.isEmpty() ? currentUser : "You're not logged in");
 						break;
 
+						/**
+						 * Whether the user is online
+						 */
 					case "isonline":
 						if (words.length < 2) {
 							out.println("Please enter username after the command");
@@ -442,6 +449,9 @@ public class Server {
 						}
 						break;
 
+						/**
+						 * Whether the user is registered
+						 */
 					case "exists":
 						if (words.length < 2) {
 							out.println("Please enter username after the command");
@@ -450,6 +460,7 @@ public class Server {
 						}
 						break;
 
+						
 					default:
 						out.println("Invalid command. Please try again.");
 					}
@@ -464,23 +475,11 @@ public class Server {
 
 		}
 
-		private void refreshActiveUserList() {
-			try {
 
-				for (Entry<String, Socket> entry : activeUsers.entrySet()) {
-					new PrintWriter(entry.getValue().getOutputStream(), true).write((byte) '\n');
-					int ch = new BufferedReader(new InputStreamReader(entry.getValue().getInputStream())).read();
-					if (ch != '\n') {
-						activeUsers.remove(entry.getKey());
-						entry.getValue().close();
-					}
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
+		/*
+		 *  Checks for the length
+		 *  Makes sure that the string is alphanumeric
+		 */
 		private String checkString(String s) {
 			int len = s.length();
 			if (len < 4 || len > 8) {
@@ -493,12 +492,6 @@ public class Server {
 			return "Only alphanumerics are allowed";
 		}
 
-		private boolean isUserLoggedIn(String userName) {
-			if (activeUsers.containsKey(userName)) {
-				return true;
-			}
-			return false;
-		}
 
 	}
 }

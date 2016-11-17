@@ -62,17 +62,8 @@ public class Client {
 			serverAddress = args[0];
 		}
 
-
-		System.out.println(serverAddress);
-
-		// To-do: remove this
-		if ("127.0.0.1".equals(serverAddress)) {
-			System.out.println("Offline local chat");
-		}
-
 		try {
 			Socket socket = new Socket();
-			// socket.setSoTimeout(5000);
 			socket.connect(new InetSocketAddress(serverAddress, 9001), 1000);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -132,35 +123,21 @@ class Receiver implements Runnable {
 				String words[] = line.split(" ");
 				
 				if (words[0].equals("sendImg")) {
-					System.out.println("sendImg method");
-					words[2] = "deepika.jpg";
-					
 					String imgName = words[2];
 					String targetUserName = words[1];
 					
-//					// To-do: check if file exists
+					// To-do: check if file exists
 					File fi = new File(imgName);
 					byte[] fileContent = Files.readAllBytes(fi.toPath());
 
-//					for (int i = 0; i < 10; i++) {
-//						System.out.print(fileContent[i] + " ");
-//					}
-//					System.out.println();
-
-					System.out.println("sending " + fileContent.length + " bytes");
-					
 					out.println("imgData " + targetUserName + " " + imgName + " " + fileContent.length);
 					
 					DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
 					dOut.write(fileContent);
 					
-//					dOut.close();
-					
 				}
 
 				if (words[0].equals("imgData")) {
-					System.out.println("imgData method");
-					
 					String sourceUserName = words[1];
 					String imgName = words[2];
 					int length = Integer.parseInt(words[3]);
@@ -170,7 +147,6 @@ class Receiver implements Runnable {
 					byte[] fileContent = new byte[length];
 					dIn.readFully(fileContent, 0, length);
 					
-					// To-do: imgName
 					FileOutputStream fos = new FileOutputStream(imgName);
 					fos.write(fileContent);
 					fos.close();
