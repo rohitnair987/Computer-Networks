@@ -401,7 +401,6 @@ public class Server {
 					case "send":
 					case "sa":
 					case "senda":
-						// To-do: cant send pri msg to urself
 
 						if (currentUser.isEmpty()) {
 							out.println("Please login to send messages. Register if you do not have an account");
@@ -414,40 +413,47 @@ public class Server {
 
 							else {
 
-								StringBuffer msg = new StringBuffer();
-								Socket targetSocket = null;
-
 								targetUserName = words[1];
-
-								// Check if target user is registered
-								if (names.get(targetUserName) == null) {
-									out.println(targetUserName + " is not registered in HoosierChat :(");
-									break;
-								}
-
-								// Check if target user is logged in
-								targetSocket = activeUsers.get(targetUserName);
-								if (targetSocket == null) {
-									out.println(targetUserName + " is inactive. Please try later.");
-									break;
-								}
-
-								// Non-anonymous send
-								if (!command.endsWith("a")) {
-									msg.append(currentUser + ": ");
-								}
-
-								msg.append(event.substring(command.length() + targetUserName.length() + 2));
-
-								if (msg.length() > MAX_MESSAGE_LENGTH) {
-									out.println("Your message is too long");
+								
+								// We do not allow sending images to oneself
+								if (currentUser.equals(targetUserName)) {
+									out.println("Can't send a text to yourself");
 								}
 
 								else {
+									StringBuffer msg = new StringBuffer();
+									Socket targetSocket = null;
 
-									// Send a one-to-one message to the
-									// designated user
-									new PrintWriter(targetSocket.getOutputStream(), true).println(msg);
+									// Check if target user is registered
+									if (names.get(targetUserName) == null) {
+										out.println(targetUserName + " is not registered in HoosierChat :(");
+										break;
+									}
+
+									// Check if target user is logged in
+									targetSocket = activeUsers.get(targetUserName);
+									if (targetSocket == null) {
+										out.println(targetUserName + " is inactive. Please try later.");
+										break;
+									}
+
+									// Non-anonymous send
+									if (!command.endsWith("a")) {
+										msg.append(currentUser + ": ");
+									}
+
+									msg.append(event.substring(command.length() + targetUserName.length() + 2));
+
+									if (msg.length() > MAX_MESSAGE_LENGTH) {
+										out.println("Your message is too long");
+									}
+
+									else {
+
+										// Send a one-to-one message to the
+										// designated user
+										new PrintWriter(targetSocket.getOutputStream(), true).println(msg);
+									}
 								}
 							}
 
