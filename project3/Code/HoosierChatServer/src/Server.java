@@ -186,20 +186,27 @@ public class Server {
 								}
 
 								else {
-									targetUser = activeUsers.get(targetUserName);
-
-									if (targetUser == null) {
-										out.println(targetUserName + " is inactive. Please try later.");
+									// Check if target user is registered
+									if (names.get(targetUserName) == null) {
+										out.println(targetUserName + " is not registered in HoosierChat :(");
 									}
 
-									/*
-									 * Tells the user that command is correct
-									 * Provides information required to send the
-									 * image
-									 */
 									else {
-										String imgName = words[2];
-										out.println("sendImg " + targetUserName + " " + imgName);
+										targetUser = activeUsers.get(targetUserName);
+
+										if (targetUser == null) {
+											out.println(targetUserName + " is inactive. Please try later.");
+										}
+
+										/*
+										 * Tells the user that command is
+										 * correct Provides information required
+										 * to send the image
+										 */
+										else {
+											String imgName = words[2];
+											out.println("sendImg " + targetUserName + " " + imgName);
+										}
 									}
 								}
 							}
@@ -254,17 +261,17 @@ public class Server {
 								String password = words[2];
 
 								// Checks the length and alphanumeric conformity
-								// String res = checkString(userName);
-								// if (!res.equals("Yes")) {
-								// out.println(res);
-								// break;
-								// }
-								//
-								// res = checkString(password);
-								// if (!res.equals("Yes")) {
-								// out.println(res);
-								// break;
-								// }
+								String res = checkString(userName);
+								if (!res.equals("Yes")) {
+									out.println(res);
+									break;
+								}
+
+								res = checkString(password);
+								if (!res.equals("Yes")) {
+									out.println(res);
+									break;
+								}
 
 								if (!names.containsKey(userName)) {
 									names.put(userName, password);

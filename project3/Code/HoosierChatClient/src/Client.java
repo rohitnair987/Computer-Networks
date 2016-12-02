@@ -104,8 +104,8 @@ class Receiver implements Runnable {
 					File fi = new File(imgName);
 					if (!fi.exists()) {
 						System.out.println("File not present");
-					} 
-					
+					}
+
 					else {
 						byte[] fileContent = Files.readAllBytes(fi.toPath());
 
