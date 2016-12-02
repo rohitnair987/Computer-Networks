@@ -401,6 +401,7 @@ public class Server {
 					case "send":
 					case "sa":
 					case "senda":
+						// To-do: cant send pri msg to urself
 
 						if (currentUser.isEmpty()) {
 							out.println("Please login to send messages. Register if you do not have an account");
