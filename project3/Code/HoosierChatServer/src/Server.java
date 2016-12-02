@@ -449,7 +449,6 @@ public class Server {
 									}
 
 									else {
-
 										// Send a one-to-one message to the
 										// designated user
 										new PrintWriter(targetSocket.getOutputStream(), true).println(msg);
