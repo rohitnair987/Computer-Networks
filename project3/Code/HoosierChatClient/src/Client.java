@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 public class Client {
 
+	private static final int PORT = 9001;
 	BufferedReader in;
 	PrintWriter out;
 
@@ -30,7 +31,8 @@ public class Client {
 		Socket socket = new Socket();
 
 		try {
-			socket.connect(new InetSocketAddress(serverAddress, 9001), 1000);
+			System.out.println("Trying to connect to the server at " + serverAddress + " on port number " + PORT);
+			socket.connect(new InetSocketAddress(serverAddress, PORT), 4000);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
