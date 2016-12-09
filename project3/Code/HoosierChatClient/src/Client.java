@@ -14,25 +14,33 @@ import java.util.Scanner;
 
 public class Client {
 
-	private static final int PORT = 9001;
 	BufferedReader in;
 	PrintWriter out;
 
 	public static void main(String[] args) throws Exception {
 
 		Scanner cin = new Scanner(System.in);
-		String serverAddress;
-		if (args.length == 0 || args[0].equalsIgnoreCase("me")) {
-			serverAddress = Inet4Address.getLocalHost().getHostAddress();
-		} else {
+		String serverAddress = Inet4Address.getLocalHost().getHostAddress();
+		int port = 9001;
+
+		// Set Server IP Address and Port Number
+		if (args.length > 0) {
 			serverAddress = args[0];
+			if (args.length > 1) {
+				try {
+					Integer.parseInt(args[1]);
+				} catch (NumberFormatException e) {
+					System.out.println("Port number should be an integer");
+				}
+			}
 		}
 
+		final int SOCKET_TIMEOUT = 4000;
 		Socket socket = new Socket();
 
 		try {
-			System.out.println("Trying to connect to the server at " + serverAddress + " on port number " + PORT);
-			socket.connect(new InetSocketAddress(serverAddress, PORT), 4000);
+			System.out.println("Trying to connect to the server at " + serverAddress + " on port number " + port);
+			socket.connect(new InetSocketAddress(serverAddress, port), SOCKET_TIMEOUT);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -83,6 +91,9 @@ class Receiver implements Runnable {
 	BufferedReader in;
 	PrintWriter out;
 
+	// Accepts only files up to 1 MB
+	static final int MAX_FILE_SIZE = 1000000;
+
 	public Receiver(Socket socket, BufferedReader in, PrintWriter out) {
 		this.socket = socket;
 		this.in = in;
@@ -94,8 +105,6 @@ class Receiver implements Runnable {
 			try {
 				// Read and display messages from the server
 				String line = in.readLine();
-				System.out.println(line);
-
 				String words[] = line.split(" ");
 
 				if (words[0].equals("sendFile")) {
@@ -111,14 +120,20 @@ class Receiver implements Runnable {
 					else {
 						byte[] fileContent = Files.readAllBytes(fi.toPath());
 
-						out.println("fileData " + targetUserName + " " + fileName + " " + fileContent.length);
+						if (fileContent.length > MAX_FILE_SIZE) {
+							System.out.println("Maximum File Size supported is 1 MB");
+						}
 
-						DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-						dOut.write(fileContent);
+						else {
+							out.println(
+									"fileDataToServer " + targetUserName + " " + fileName + " " + fileContent.length);
+							DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+							dOut.write(fileContent);
+						}
 					}
 				}
 
-				if (words[0].equals("fileData")) {
+				else if (words[0].equals("fileDataFromServer")) {
 					String sourceUserName = words[1];
 					String fileName = words[2];
 					int length = Integer.parseInt(words[3]);
@@ -133,8 +148,12 @@ class Receiver implements Runnable {
 					fos.close();
 
 					System.out.println("Received " + fileName + " from " + sourceUserName);
-
 				}
+
+				else {
+					System.out.println(line);
+				}
+
 			} catch (NullPointerException npe) {
 				System.out.println("Disconnected from server. Please try again later");
 				System.exit(1);

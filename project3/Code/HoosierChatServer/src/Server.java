@@ -45,8 +45,7 @@ class Receiver implements Runnable {
 						System.out.println("--------------------------------------");
 					}
 					System.out.println(Inet4Address.getLocalHost().getHostAddress());
-				}
-				else {
+				} else {
 					System.out.println("Invalid command");
 				}
 			} catch (Exception e) {
@@ -99,7 +98,7 @@ public class Server {
 		ServerSocket listener = new ServerSocket(PORT);
 		System.out.println("My IP: " + Inet4Address.getLocalHost().getHostAddress());
 		System.out.println("Port: " + listener.getLocalPort());
-		
+
 		try {
 			while (true) {
 				// Open a new thread per client
@@ -223,7 +222,7 @@ public class Server {
 					 * Inputs the file data Provides information required to
 					 * receive the file Outputs the file
 					 */
-					case "fileData":
+					case "fileDataToServer":
 
 						targetUserName = words[1];
 						String fileName = words[2];
@@ -240,9 +239,11 @@ public class Server {
 							dIn.readFully(fileContent, 0, length);
 
 							// Forward the file to target socket
-							targetOut.println("fileData " + currentUser + " " + fileName + " " + length);
+							targetOut.println("fileDataFromServer " + currentUser + " " + fileName + " " + length);
 							DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
 							dOut.write(fileContent);
+						} else {
+							System.out.println("Empty file");
 						}
 
 						break;
@@ -419,7 +420,7 @@ public class Server {
 							else {
 
 								targetUserName = words[1];
-								
+
 								// We do not allow sending files to oneself
 								if (currentUser.equals(targetUserName)) {
 									out.println("Can't send a text to yourself");
