@@ -165,89 +165,6 @@ public class Server {
 
 					switch (command) {
 
-					/**
-					 * The original client request for sending an file to
-					 * another client
-					 */
-					case "f":
-					case "file":
-
-						// User has to be online to send an file
-						if (currentUser.isEmpty() || !activeUsers.containsKey(currentUser)) {
-							out.println("Please login to send a file");
-						}
-
-						else {
-
-							if (words.length != 3) {
-								out.println("Invalid " + command + " command.");
-							} else {
-								targetUserName = words[1];
-
-								// We do not allow sending files to oneself
-								if (currentUser.equals(targetUserName)) {
-									out.println("Can't send an file to yourself");
-								}
-
-								else {
-									// Check if target user is registered
-									if (names.get(targetUserName) == null) {
-										out.println(targetUserName + " is not registered in HoosierChat :(");
-									}
-
-									else {
-										targetUser = activeUsers.get(targetUserName);
-
-										if (targetUser == null) {
-											out.println(targetUserName + " is inactive. Please try later.");
-										}
-
-										/*
-										 * Tells the user that command is
-										 * correct Provides information required
-										 * to send the file
-										 */
-										else {
-											String fileName = words[2];
-											out.println("sendFile " + targetUserName + " " + fileName);
-										}
-									}
-								}
-							}
-						}
-
-						break;
-
-					/*
-					 * Inputs the file data Provides information required to
-					 * receive the file Outputs the file
-					 */
-					case "fileDataToServer":
-
-						targetUserName = words[1];
-						String fileName = words[2];
-						int length = Integer.parseInt(words[3]);
-						targetUser = activeUsers.get(targetUserName);
-
-						PrintWriter targetOut = new PrintWriter(targetUser.getOutputStream(), true);
-
-						DataInputStream dIn = new DataInputStream(socket.getInputStream());
-
-						if (length > 0) {
-							// Read the file from the current socket
-							byte[] fileContent = new byte[length];
-							dIn.readFully(fileContent, 0, length);
-
-							// Forward the file to target socket
-							targetOut.println("fileDataFromServer " + currentUser + " " + fileName + " " + length);
-							DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
-							dOut.write(fileContent);
-						} else {
-							System.out.println("Empty file");
-						}
-
-						break;
-
 					case "r":
 					case "register":
 
@@ -505,6 +422,118 @@ public class Server {
 							out.println(names.containsKey(words[1]) ? "Yes" : "No");
 						}
 						break;
+						
+						
+						/**
+						 * The original client request for sending an file to
+						 * another client
+						 */
+						case "f":
+						case "file":
+
+							// User has to be online to send an file
+							if (currentUser.isEmpty() || !activeUsers.containsKey(currentUser)) {
+								out.println("Please login to send a file");
+							}
+
+							else {
+
+								if (words.length != 3) {
+									out.println("Invalid " + command + " command.");
+								} else {
+									targetUserName = words[1];
+
+									// We do not allow sending files to oneself
+									if (currentUser.equals(targetUserName)) {
+										out.println("Can't send an file to yourself");
+									}
+
+									else {
+										// Check if target user is registered
+										if (names.get(targetUserName) == null) {
+											out.println(targetUserName + " is not registered in HoosierChat :(");
+										}
+
+										else {
+											targetUser = activeUsers.get(targetUserName);
+
+											if (targetUser == null) {
+												out.println(targetUserName + " is inactive. Please try later.");
+											}
+
+											/*
+											 * Tells the user that command is
+											 * correct Provides information required
+											 * to send the file
+											 */
+											else {
+												String fileName = words[2];
+												out.println("sendFile " + targetUserName + " " + fileName);
+											}
+										}
+									}
+								}
+							}
+
+							break;
+
+						/*
+						 * Inputs the file data Provides information required to
+						 * receive the file Outputs the file
+						 */
+						case "fileDataToServer":
+
+							targetUserName = words[1];
+							String fileName = words[2];
+							int length = Integer.parseInt(words[3]);
+							targetUser = activeUsers.get(targetUserName);
+
+							PrintWriter targetOut = new PrintWriter(targetUser.getOutputStream(), true);
+
+							DataInputStream dIn = new DataInputStream(socket.getInputStream());
+
+							if (length > 0) {
+								// Read the file from the current socket
+								byte[] fileContent = new byte[length];
+								dIn.readFully(fileContent, 0, length);
+
+								// Forward the file to target socket
+								targetOut.println("fileDataFromServer " + currentUser + " " + fileName + " " + length);
+								DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
+								dOut.write(fileContent);
+							} else {
+								System.out.println("Empty file");
+							}
+
+							break;
+
+						
+						case "man":
+							
+							if(words.length > 1) {
+								out.println("Invalid man command");
+							}
+							else {
+								out.println("------------------------------------------");
+								
+								out.println("1. Register <Username> <Password>");
+								out.println("2. Login <Username> <Password>");
+								out.println("3. Logout");
+								out.println("4. Broadcast message");
+								out.println("5. BroadcastA message");
+								out.println("6. Send TargetUsername message");
+								out.println("7. SendA TargetUsername message");
+								out.println("8. List");
+								out.println("9. WhoAmI");
+								out.println("10. IsOnline TargetUsername");
+								out.println("11. Exists Username");
+								out.println("12. File TargetUsername FileName");
+								
+								out.println("------------------------------------------");
+								
+							}
+							
+							break;
 
 					default:
 						out.println("Invalid command. Please try again.");
