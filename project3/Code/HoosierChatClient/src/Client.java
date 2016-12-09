@@ -98,12 +98,12 @@ class Receiver implements Runnable {
 
 				String words[] = line.split(" ");
 
-				if (words[0].equals("sendImg")) {
-					String imgName = words[2];
+				if (words[0].equals("sendFile")) {
+					String fileName = words[2];
 					String targetUserName = words[1];
 
 					// To-do: check if file exists
-					File fi = new File(imgName);
+					File fi = new File(fileName);
 					if (!fi.exists()) {
 						System.out.println("File not present");
 					}
@@ -111,16 +111,16 @@ class Receiver implements Runnable {
 					else {
 						byte[] fileContent = Files.readAllBytes(fi.toPath());
 
-						out.println("imgData " + targetUserName + " " + imgName + " " + fileContent.length);
+						out.println("fileData " + targetUserName + " " + fileName + " " + fileContent.length);
 
 						DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
 						dOut.write(fileContent);
 					}
 				}
 
-				if (words[0].equals("imgData")) {
+				if (words[0].equals("fileData")) {
 					String sourceUserName = words[1];
-					String imgName = words[2];
+					String fileName = words[2];
 					int length = Integer.parseInt(words[3]);
 					System.out.println("data length " + length);
 
@@ -128,11 +128,11 @@ class Receiver implements Runnable {
 					byte[] fileContent = new byte[length];
 					dIn.readFully(fileContent, 0, length);
 
-					FileOutputStream fos = new FileOutputStream(imgName);
+					FileOutputStream fos = new FileOutputStream(fileName);
 					fos.write(fileContent);
 					fos.close();
 
-					System.out.println("Received " + imgName + " from " + sourceUserName);
+					System.out.println("Received " + fileName + " from " + sourceUserName);
 
 				}
 			} catch (NullPointerException npe) {

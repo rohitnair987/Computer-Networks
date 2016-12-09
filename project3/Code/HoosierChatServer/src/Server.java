@@ -167,15 +167,15 @@ public class Server {
 					switch (command) {
 
 					/**
-					 * The original client request for sending an image to
+					 * The original client request for sending an file to
 					 * another client
 					 */
-					case "img":
-					case "image":
+					case "f":
+					case "file":
 
-						// User has to be online to send an image
+						// User has to be online to send an file
 						if (currentUser.isEmpty() || !activeUsers.containsKey(currentUser)) {
-							out.println("Please login to send an image");
+							out.println("Please login to send a file");
 						}
 
 						else {
@@ -185,9 +185,9 @@ public class Server {
 							} else {
 								targetUserName = words[1];
 
-								// We do not allow sending images to oneself
+								// We do not allow sending files to oneself
 								if (currentUser.equals(targetUserName)) {
-									out.println("Can't send an image to yourself");
+									out.println("Can't send an file to yourself");
 								}
 
 								else {
@@ -206,11 +206,11 @@ public class Server {
 										/*
 										 * Tells the user that command is
 										 * correct Provides information required
-										 * to send the image
+										 * to send the file
 										 */
 										else {
-											String imgName = words[2];
-											out.println("sendImg " + targetUserName + " " + imgName);
+											String fileName = words[2];
+											out.println("sendFile " + targetUserName + " " + fileName);
 										}
 									}
 								}
@@ -220,13 +220,13 @@ public class Server {
 						break;
 
 					/*
-					 * Inputs the image data Provides information required to
-					 * receive the image Outputs the image
+					 * Inputs the file data Provides information required to
+					 * receive the file Outputs the file
 					 */
-					case "imgData":
+					case "fileData":
 
 						targetUserName = words[1];
-						String imgName = words[2];
+						String fileName = words[2];
 						int length = Integer.parseInt(words[3]);
 						targetUser = activeUsers.get(targetUserName);
 
@@ -235,12 +235,12 @@ public class Server {
 						DataInputStream dIn = new DataInputStream(socket.getInputStream());
 
 						if (length > 0) {
-							// Read the image from the current socket
+							// Read the file from the current socket
 							byte[] fileContent = new byte[length];
 							dIn.readFully(fileContent, 0, length);
 
-							// Forward the image to target socket
-							targetOut.println("imgData " + currentUser + " " + imgName + " " + length);
+							// Forward the file to target socket
+							targetOut.println("fileData " + currentUser + " " + fileName + " " + length);
 							DataOutputStream dOut = new DataOutputStream(targetUser.getOutputStream());
 							dOut.write(fileContent);
 						}
@@ -420,7 +420,7 @@ public class Server {
 
 								targetUserName = words[1];
 								
-								// We do not allow sending images to oneself
+								// We do not allow sending files to oneself
 								if (currentUser.equals(targetUserName)) {
 									out.println("Can't send a text to yourself");
 								}
