@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -43,8 +44,9 @@ class Receiver implements Runnable {
 						}
 						System.out.println("--------------------------------------");
 					}
-					System.out.println();
-				} else {
+					System.out.println(Inet4Address.getLocalHost().getHostAddress());
+				}
+				else {
 					System.out.println("Invalid command");
 				}
 			} catch (Exception e) {
@@ -95,6 +97,9 @@ public class Server {
 		consoleReader.start();
 
 		ServerSocket listener = new ServerSocket(PORT);
+		System.out.println("My IP: " + Inet4Address.getLocalHost().getHostAddress());
+		System.out.println("Port: " + listener.getLocalPort());
+		
 		try {
 			while (true) {
 				// Open a new thread per client
